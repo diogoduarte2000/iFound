@@ -1,0 +1,283 @@
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Router, RouterLink } from '@angular/router';
+import { PublicationService } from '../../services/publication.service';
+import { AuthService } from '../../services/auth.service';
+import { ChatService } from '../../services/chat.service';
+import { PORTUGAL_LOCATIONS } from '../../shared/portugal-locations';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.scss']
+})
+export class DashboardComponent implements OnInit, OnDestroy {
+  publications: any[] = [];
+  conversations: any[] = [];
+  viewMode: 'list' | 'create' = 'list';
+  filterType: 'Todos' | 'Perdido' | 'Achado' = 'Todos';
+  filterStatus: 'Todos' | 'Ativo' | 'Pendente' = 'Todos';
+  selectedZone = '';
+  searchQuery = '';
+  currentUserId = '';
+
+  pubForm: FormGroup;
+  hasAttemptedSubmit = false;
+  isLoading = false;
+  isFeedLoading = false;
+  isConversationLoading = false;
+  message = '';
+  conversationError = '';
+
+  readonly locationOptions = PORTUGAL_LOCATIONS;
+  readonly modelosIphone = [
+    'iPhone 15 Pro Max',
+    'iPhone 15 Pro',
+    'iPhone 15',
+    'iPhone 14 Pro Max',
+    'iPhone 14 Pro',
+    'iPhone 14',
+    'iPhone 13 Pro Max',
+    'iPhone 13 Pro',
+    'iPhone 13',
+    'iPhone 12',
+    'iPhone 11',
+    'Outro / Antigo'
+  ];
+
+  private searchDebounce: ReturnType<typeof setTimeout> | null = null;
+
+  constructor(
+    private pubService: PublicationService,
+    private authService: AuthService,
+    private chatService: ChatService,
+    private fb: FormBuilder,
+    private router: Router
+  ) {
+    this.pubForm = this.fb.group({
+      type: ['Perdido', Validators.required],
+      model: ['', Validators.required],
+      color: ['', Validators.required],
+      storage: [''],
+      imei: [''],
+      distinctiveMarks: [''],
+      zone: ['', Validators.required],
+      exactLocation: [''],
+      dateOfEvent: ['', Validators.required]
+    });
+  }
+
+  ngOnInit() {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.currentUserId = this.authService.getCurrentUser()?.id || '';
+    this.loadPublications();
+    this.loadConversations();
+  }
+
+  ngOnDestroy() {
+    if (this.searchDebounce) {
+      clearTimeout(this.searchDebounce);
+    }
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  setFeedView() {
+    this.viewMode = 'list';
+  }
+
+  setCreateView() {
+    this.viewMode = 'create';
+  }
+
+  openChatsPage() {
+    this.router.navigate(['/conversas']);
+  }
+
+  setFilter(type: 'Todos' | 'Perdido' | 'Achado') {
+    this.filterType = type;
+    this.loadPublications();
+  }
+
+  setStatus(status: 'Todos' | 'Ativo' | 'Pendente') {
+    this.filterStatus = status;
+    this.loadPublications();
+  }
+
+  onZoneChange(zone: string) {
+    this.selectedZone = zone;
+    this.loadPublications();
+  }
+
+  onSearchInput(value: string) {
+    this.searchQuery = value;
+
+    if (this.searchDebounce) {
+      clearTimeout(this.searchDebounce);
+    }
+
+    this.searchDebounce = setTimeout(() => {
+      this.loadPublications();
+    }, 250);
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.loadPublications();
+  }
+
+  loadPublications() {
+    this.isFeedLoading = true;
+
+    const filters = {
+      type: this.filterType === 'Todos' ? undefined : this.filterType,
+      status: this.filterStatus === 'Todos' ? undefined : this.filterStatus,
+      zone: this.selectedZone || undefined,
+      q: this.searchQuery.trim() || undefined
+    };
+
+    this.pubService.getPublications(filters).subscribe({
+      next: (data) => {
+        this.publications = data;
+        this.isFeedLoading = false;
+      },
+      error: () => {
+        this.isFeedLoading = false;
+      }
+    });
+  }
+
+  loadConversations() {
+    this.isConversationLoading = true;
+    this.conversationError = '';
+
+    this.chatService.getConversations().subscribe({
+      next: (data) => {
+        this.conversations = data;
+        this.isConversationLoading = false;
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isConversationLoading = false;
+        this.conversationError = err.error?.message || 'Nao foi possivel carregar as conversas.';
+      }
+    });
+  }
+
+  onSubmitPublication() {
+    this.hasAttemptedSubmit = true;
+
+    if (this.pubForm.invalid) {
+      this.pubForm.markAllAsTouched();
+      this.message = `Falta preencher: ${this.getMissingRequiredFields().join(', ')}.`;
+      return;
+    }
+
+    this.isLoading = true;
+    this.message = '';
+
+    this.pubService.createPublication(this.pubForm.value).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.viewMode = 'list';
+        this.pubForm.reset({ type: 'Perdido' });
+        this.hasAttemptedSubmit = false;
+        this.loadPublications();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+
+        if (err.status === 401 || err.status === 400) {
+          const backendMessage = err.error?.message || '';
+          if (backendMessage.toLowerCase().includes('token')) {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+            return;
+          }
+        }
+
+        if (err.status === 0) {
+          this.message = 'Nao foi possivel ligar ao backend. Confirme se o servidor esta a correr na porta 5000.';
+          return;
+        }
+
+        this.message = err.error?.message || 'Erro ao criar publicacao.';
+      }
+    });
+  }
+
+  isFieldInvalid(fieldName: string) {
+    const control = this.pubForm.get(fieldName);
+    return !!control && control.invalid && (control.touched || this.hasAttemptedSubmit);
+  }
+
+  isOwnPublication(publication: any) {
+    return publication?.author?._id === this.currentUserId;
+  }
+
+  openChat(publication: any) {
+    this.router.navigate(['/conversas'], {
+      queryParams: { publicationId: publication._id }
+    });
+  }
+
+  openOwnPublicationChats(publication: any) {
+    this.router.navigate(['/conversas'], {
+      queryParams: {
+        publicationId: publication._id,
+        ownerView: '1'
+      }
+    });
+  }
+
+  openExistingConversation(conversationId: string) {
+    this.router.navigate(['/conversas'], {
+      queryParams: { chatId: conversationId }
+    });
+  }
+
+  getConversationPartner(conversation: any) {
+    return conversation?.participants?.find((participant: any) => participant._id !== this.currentUserId)
+      || conversation?.publication?.author;
+  }
+
+  getLastMessagePreview(conversation: any) {
+    if (!conversation?.lastMessage) {
+      return 'Sem mensagens ainda.';
+    }
+
+    if (conversation.lastMessage.text) {
+      return conversation.lastMessage.text;
+    }
+
+    if (conversation.lastMessage.hasAttachments) {
+      return 'Enviou fotos temporarias.';
+    }
+
+    return 'Sem mensagens ainda.';
+  }
+
+  private getMissingRequiredFields() {
+    const labels: Record<string, string> = {
+      type: 'tipo de ocorrencia',
+      model: 'modelo',
+      color: 'cor',
+      zone: 'localidade',
+      dateOfEvent: 'data da ocorrencia'
+    };
+
+    return Object.entries(labels)
+      .filter(([fieldName]) => this.pubForm.get(fieldName)?.hasError('required'))
+      .map(([, label]) => label);
+  }
+}

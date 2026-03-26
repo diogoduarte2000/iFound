@@ -4,36 +4,56 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "15mb" }));
 app.use(cors());
 
-// Basic Route for testing
-app.get("/api/status", (req, res) => {
-  res.json({ message: "Backend do Perdidos e Achados (Portugal) a funcionar!" });
+app.get("/", (req, res) => {
+  res.json({
+    message: "Backend do Ifound a funcionar!",
+    status: "/api/status",
+    auth: "/api/auth",
+    posts: "/api/posts",
+  });
 });
 
-// Import Routes
+app.get("/api/status", (req, res) => {
+  res.json({ message: "Backend do Ifound a funcionar!" });
+});
+
 const authRoutes = require("./routes/auth");
 const publicationRoutes = require("./routes/publications");
+const chatRoutes = require("./routes/chats");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", publicationRoutes);
+app.use("/api/chats", chatRoutes);
+
+app.use((req, res) => {
+  res.status(404).json({
+    message: "Rota nao encontrada.",
+    path: req.originalUrl,
+  });
+});
 
 const PORT = process.env.PORT || 5000;
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/ifound";
+const smtpConfigured = Boolean(
+  process.env.SMTP_HOST &&
+  process.env.SMTP_PORT &&
+  process.env.SMTP_USER &&
+  process.env.SMTP_PASS
+);
 
-// Connect to MongoDB
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/perdidos-achados-iphone";
-
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log("🔥 Ligado à base de dados MongoDB!");
-  app.listen(PORT, () => {
-    console.log(`🚀 Servidor a correr na porta ${PORT}`);
+mongoose.connect(MONGODB_URI)
+  .then(() => {
+    console.log("MongoDB ligado com sucesso.");
+    if (!smtpConfigured) {
+      console.warn("SMTP nao configurado. O 2FA por email nao vai funcionar.");
+    }
+    app.listen(PORT, () => {
+      console.log(`Servidor a correr na porta ${PORT}.`);
+    });
+  })
+  .catch((err) => {
+    console.error("Erro ao ligar ao MongoDB:", err);
   });
-})
-.catch((err) => {
-  console.error("❌ Erro ao ligar ao MongoDB:", err);
-});

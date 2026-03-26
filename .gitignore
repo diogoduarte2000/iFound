@@ -1,0 +1,6 @@
+backend/.env
+backend/backend-server.log
+backend/backend-server.err
+backend/storage/
+frontend/frontend-server.log
+frontend/frontend-server.err

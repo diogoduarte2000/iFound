@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema(
   {
     email: { type: String, required: true, unique: true },
     passwordHash: { type: String, required: true },
-    nif: { type: String, required: true }, // Tax ID for Portugal
+    nif: { type: String, required: true, unique: true }, // Tax ID for Portugal
     
     // 2FA Fields
     twoFactorSecret: { type: String }, 

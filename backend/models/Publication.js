@@ -18,7 +18,10 @@ const publicationSchema = new mongoose.Schema(
     
     // Ownership
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    status: { type: String, enum: ["Ativo", "Resolvido"], default: "Ativo" },
+    status: { type: String, enum: ["Ativo", "Pendente", "Resolvido", "Offline"], default: "Ativo" },
+    pendingSince: { type: Date, default: null },
+    resolvedAt: { type: Date, default: null },
+    offlineAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

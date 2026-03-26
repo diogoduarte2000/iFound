@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles can go here */
+body {
+    background-color: #f8fafc; /* Slate 50 for premium light feel */
+    font-family: 'Inter', sans-serif; /* We assume Inter is loaded or default system font */
+}

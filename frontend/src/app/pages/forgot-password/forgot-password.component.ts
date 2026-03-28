@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { resolveApiUrl } from '../../services/api.config';
 
 @Component({
   selector: 'app-forgot-password',
@@ -43,7 +44,7 @@ export class ForgotPasswordComponent {
 
     const payload = this.emailForm.value;
 
-    this.http.post<{message: string; deliveryMode?: string; devCode?: string}>(`http://localhost:5000/api/auth/forgot-password`, payload)
+    this.http.post<{message: string; deliveryMode?: string; devCode?: string}>(resolveApiUrl('/auth/forgot-password'), payload)
       .subscribe({
         next: (res) => {
           this.isLoading = false;
@@ -72,7 +73,7 @@ export class ForgotPasswordComponent {
       newPassword: this.resetForm.value.newPassword
     };
 
-    this.http.post<{message: string}>(`http://localhost:5000/api/auth/reset-password`, payload)
+    this.http.post<{message: string}>(resolveApiUrl('/auth/reset-password'), payload)
       .subscribe({
         next: (res) => {
           this.isLoading = false;

@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { resolveApiUrl, resolveBackendUrl } from './api.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
-  private apiUrl = 'http://localhost:5000/api/chats';
+  private apiUrl = resolveApiUrl('/chats');
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -37,7 +38,12 @@ export class ChatService {
 
   resolveAttachmentUrl(url: string): string {
     const token = this.authService.getToken();
-    const resolvedUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
-    return token ? `${resolvedUrl}?token=${encodeURIComponent(token)}` : resolvedUrl;
+    const resolvedUrl = resolveBackendUrl(url);
+    if (!token) {
+      return resolvedUrl;
+    }
+
+    const separator = resolvedUrl.includes('?') ? '&' : '?';
+    return `${resolvedUrl}${separator}token=${encodeURIComponent(token)}`;
   }
 }

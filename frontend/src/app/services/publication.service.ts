@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { resolveApiUrl } from './api.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PublicationService {
-  private apiUrl = 'http://localhost:5000/api/posts';
+  private apiUrl = resolveApiUrl('/posts');
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 

@@ -11,7 +11,8 @@ const router = express.Router();
 const ATTACHMENT_TTL_MS = 12 * 60 * 60 * 1000;
 const MAX_ATTACHMENTS = 3;
 const MAX_ATTACHMENT_BYTES = 4 * 1024 * 1024;
-const uploadRoot = path.join(__dirname, "..", "storage", "chat-attachments");
+const storageRoot = process.env.NETLIFY ? path.join("/tmp", "ifound-storage") : path.join(__dirname, "..", "storage");
+const uploadRoot = path.join(storageRoot, "chat-attachments");
 
 if (!fsSync.existsSync(uploadRoot)) {
   fsSync.mkdirSync(uploadRoot, { recursive: true });

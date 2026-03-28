@@ -1,9 +1,29 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/ifound";
+const DEFAULT_LOCAL_MONGODB_URI = "mongodb://127.0.0.1:27017/ifound";
 
 let connectionPromise = null;
+
+const isProductionRuntime = () =>
+  process.env.NODE_ENV === "production" || Boolean(process.env.NETLIFY);
+
+const isDatabaseConfigured = () =>
+  Boolean(process.env.MONGODB_URI) || !isProductionRuntime();
+
+const getMongoUri = () => {
+  if (process.env.MONGODB_URI) {
+    return process.env.MONGODB_URI;
+  }
+
+  if (isProductionRuntime()) {
+    const error = new Error("MONGODB_URI_NOT_CONFIGURED");
+    error.code = "MONGODB_URI_NOT_CONFIGURED";
+    throw error;
+  }
+
+  return DEFAULT_LOCAL_MONGODB_URI;
+};
 
 const isSmtpConfigured = () =>
   Boolean(
@@ -19,7 +39,7 @@ const connectToDatabase = async () => {
   }
 
   if (!connectionPromise) {
-    connectionPromise = mongoose.connect(MONGODB_URI).catch((error) => {
+    connectionPromise = mongoose.connect(getMongoUri()).catch((error) => {
       connectionPromise = null;
       throw error;
     });
@@ -31,5 +51,6 @@ const connectToDatabase = async () => {
 
 module.exports = {
   connectToDatabase,
+  isDatabaseConfigured,
   isSmtpConfigured,
 };

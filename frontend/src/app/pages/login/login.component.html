@@ -1,68 +1,70 @@
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-  <div class="max-w-md w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden p-8 transition-all relative">
+<div class="min-h-screen bg-[#f5f5f7] flex items-center justify-center p-4 font-sans">
+  <div class="max-w-[440px] w-full bg-white/90 backdrop-blur-3xl border border-black/[0.04] rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.08)] overflow-hidden p-10 transition-all relative">
     
     <!-- Header -->
-    <div class="text-center mb-8">
-      <div class="w-16 h-16 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-500/30">
-        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+    <div class="text-center mb-10">
+      <div class="w-16 h-16 bg-gradient-to-tr from-gray-50 to-gray-100 rounded-[18px] flex items-center justify-center mx-auto mb-6 shadow-sm border border-gray-200/60">
+        <svg class="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
       </div>
-      <h2 class="text-3xl font-bold tracking-tight text-white mb-1">Ifound</h2>
-      <p class="text-slate-400 text-sm">Plataforma exclusiva para Portugal</p>
+      <h2 class="text-[28px] font-semibold tracking-tight text-[#1d1d1f] mb-2 leading-tight">Iniciar Sessão</h2>
+      <p class="text-[#86868b] text-[15px]">Aceda à plataforma iFound</p>
     </div>
 
     <!-- Error Message -->
     @if(errorMessage) {
-      <div class="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-xl mb-6 text-sm flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      <div class="bg-[#fff2f2] text-[#e30000] p-4 rounded-xl mb-6 text-[15px] flex items-center gap-3 font-medium">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
         {{ errorMessage }}
       </div>
     }
 
     @if(infoMessage) {
-      <div class="bg-blue-500/10 border border-blue-500/40 text-blue-300 p-3 rounded-xl mb-6 text-sm flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"></path></svg>
+      <div class="bg-[#f0f8ff] text-[#0066cc] p-4 rounded-xl mb-6 text-[15px] flex items-center gap-3 font-medium">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"></path></svg>
         {{ infoMessage }}
       </div>
     }
 
     <!-- Step 1: Credentials -->
     @if(step === 1) {
-      <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="space-y-5">
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-1">Email</label>
-          <input type="email" formControlName="email" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="nome@exemplo.pt">
+          <input type="email" formControlName="email" class="w-full bg-[#f5f5f7] border border-transparent rounded-[14px] px-4 py-[14px] text-[#1d1d1f] text-[17px] placeholder-[#86868b] focus:outline-none focus:ring-[3px] focus:ring-[#0066cc]/40 focus:bg-white focus:border-[#0066cc] transition-all" placeholder="ID Apple ou Email">
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-1">Password</label>
-          <input type="password" formControlName="password" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="••••••••">
+          <input type="password" formControlName="password" class="w-full bg-[#f5f5f7] border border-transparent rounded-[14px] px-4 py-[14px] text-[#1d1d1f] text-[17px] placeholder-[#86868b] focus:outline-none focus:ring-[3px] focus:ring-[#0066cc]/40 focus:bg-white focus:border-[#0066cc] transition-all" placeholder="Palavra-passe">
         </div>
-        <button type="submit" [disabled]="loginForm.invalid || isLoading" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-blue-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-          {{ isLoading ? 'A processar...' : 'Entrar' }}
-        </button>
+        <div class="pt-4">
+          <button type="submit" [disabled]="loginForm.invalid || isLoading" class="w-full bg-[#0066cc] hover:bg-[#005bb5] text-white font-medium py-[14px] px-4 rounded-[14px] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-[17px]">
+            {{ isLoading ? 'A processar...' : 'Continuar com Email' }}
+          </button>
+        </div>
       </form>
     }
 
     <!-- Step 2: 2FA -->
     @if(step === 2) {
-      <form [formGroup]="twoFaForm" (ngSubmit)="onVerify()" class="space-y-5">
-        <div class="text-center mb-2">
-          <p class="text-slate-300 text-sm">Enviámos um código temporário (2FA) para:</p>
-          <p class="font-medium text-white">{{ loginForm.value.email }}</p>
+      <form [formGroup]="twoFaForm" (ngSubmit)="onVerify()" class="space-y-6">
+        <div class="text-center mb-6">
+          <p class="text-[#86868b] text-[15px]">Enviámos um código para:</p>
+          <p class="font-medium text-[#1d1d1f] mt-1">{{ loginForm.value.email }}</p>
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-1 text-center">Código de Segurança</label>
-          <input type="text" formControlName="code" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-center text-2xl tracking-widest placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-mono" placeholder="000000" maxlength="6">
+          <input type="text" formControlName="code" class="w-full bg-[#f5f5f7] border border-transparent rounded-[14px] px-4 py-[14px] text-[#1d1d1f] text-center text-3xl tracking-[0.25em] placeholder-[#d2d2d7] focus:outline-none focus:ring-[3px] focus:ring-[#0066cc]/40 focus:bg-white focus:border-[#0066cc] transition-all font-mono" placeholder="000000" maxlength="6">
         </div>
-        <button type="submit" [disabled]="twoFaForm.invalid || isLoading" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-purple-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-          {{ isLoading ? 'A verificar...' : 'Verificar Código' }}
-        </button>
-        <button type="button" (click)="step = 1" class="w-full bg-transparent text-slate-400 hover:text-white text-sm py-2">Voltar</button>
+        <div class="pt-2">
+          <button type="submit" [disabled]="twoFaForm.invalid || isLoading" class="w-full bg-[#0066cc] hover:bg-[#005bb5] text-white font-medium py-[14px] px-4 rounded-[14px] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-[17px]">
+            {{ isLoading ? 'A verificar...' : 'Validar Sessão' }}
+          </button>
+        </div>
+        <button type="button" (click)="step = 1" class="w-full bg-transparent text-[#0066cc] hover:underline font-medium text-[15px] py-1 transition-colors">Voltar atrás</button>
       </form>
     }
 
     <!-- Footer -->
-    <div class="mt-8 text-center">
-      <p class="text-slate-400 text-sm">Não tens conta? <a routerLink="/register" class="text-blue-400 hover:text-blue-300 font-medium transition-colors cursor-pointer">Regista-te aqui</a></p>
+    <div class="mt-8 text-center pt-6 border-t border-[#f5f5f7] flex flex-col gap-3">
+      <p class="text-[#86868b] text-[15px]"><a routerLink="/forgot-password" class="text-[#0066cc] hover:underline font-medium transition-colors cursor-pointer">Esqueceu-se da palavra-passe?</a></p>
+      <p class="text-[#86868b] text-[15px]">Não tem uma conta iFound? <a routerLink="/register" class="text-[#0066cc] hover:underline font-medium transition-colors cursor-pointer">Crie a sua agora!</a></p>
     </div>
   </div>
 </div>

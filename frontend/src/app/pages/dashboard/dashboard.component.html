@@ -1,35 +1,35 @@
-<div class="min-h-screen bg-[radial-gradient(circle_at_top,_#dbeafe_0%,_#f8fafc_28%,_#e2e8f0_100%)] text-slate-800">
-  <nav class="sticky top-0 z-40 border-b border-white/70 bg-white/80 backdrop-blur-xl shadow-sm">
-    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans selection:bg-[#0066cc]/20">
+  <nav class="sticky top-0 z-40 border-b border-black/[0.04] bg-white/70 backdrop-blur-2xl">
+    <div class="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
       <div class="flex items-center gap-3">
-        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 via-cyan-500 to-blue-700 shadow-lg shadow-sky-500/20">
-          <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+        <div class="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#1d1d1f] shadow-sm">
+          <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
           </svg>
         </div>
         <div>
-          <p class="text-lg font-black tracking-tight text-slate-950">Ifound</p>
-          <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Feed global em tempo real</p>
+          <p class="text-[19px] font-semibold tracking-tight text-[#1d1d1f]">iFound</p>
+          <p class="text-[11px] font-medium tracking-[0.06em] text-[#86868b]">Plataforma Global</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3">
-        <button (click)="setFeedView()" [class.bg-slate-950]="viewMode === 'list'" [class.text-white]="viewMode === 'list'" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-950">
+        <button (click)="setFeedView()" [class.bg-[#1d1d1f]]="viewMode === 'list'" [class.text-white]="viewMode === 'list'" class="rounded-full bg-transparent px-4 py-[6px] text-[13px] font-medium text-[#1d1d1f] transition duration-200 hover:bg-black/5">
           Feed Global
         </button>
-        <button (click)="setCreateView()" [class.bg-cyan-600]="viewMode === 'create'" [class.text-white]="viewMode === 'create'" class="rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-100">
-          + Comunicar Caso
+        <button (click)="setCreateView()" [class.bg-[#0066cc]]="viewMode === 'create'" [class.text-white]="viewMode === 'create'" [class.bg-transparent]="viewMode !== 'create'" [class.text-[#0066cc]]="viewMode !== 'create'" class="rounded-full px-4 py-[6px] text-[13px] font-medium transition duration-200 hover:bg-[#0066cc]/10 text-[#0066cc]">
+          Publicar Caso
         </button>
-        <button (click)="openChatsPage()" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-950">
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z"></path>
+        <button (click)="openChatsPage()" class="inline-flex items-center gap-1.5 rounded-full bg-transparent px-4 py-[6px] text-[13px] font-medium text-[#1d1d1f] transition duration-200 hover:bg-black/5">
+          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z"></path>
           </svg>
-          Conversas
+          Inbox
         </button>
-        <a routerLink="/minhas-publicacoes" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-950">
-          As suas publicacoes
+         <a routerLink="/minhas-publicacoes" class="rounded-full bg-transparent px-4 py-[6px] text-[13px] font-medium text-[#1d1d1f] transition duration-200 hover:bg-black/5">
+          Os Seus Anúncios
         </a>
-        <button (click)="logout()" class="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100">
+        <button (click)="logout()" class="rounded-full bg-transparent px-4 py-[6px] text-[13px] font-medium text-[#e30000] transition duration-200 hover:bg-[#fff2f2]">
           Sair
         </button>
       </div>
@@ -37,51 +37,54 @@
   </nav>
 
   @if(viewMode === 'list') {
-    <main class="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)_320px] lg:px-8">
+    <main class="mx-auto grid max-w-[1200px] gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)_320px] lg:px-8">
       <aside class="space-y-4 lg:sticky lg:top-24 lg:h-fit">
-        <section class="rounded-[28px] border border-white/70 bg-white/80 p-5 shadow-lg shadow-slate-200/40 backdrop-blur">
-          <div class="mb-4">
-            <p class="text-sm font-black uppercase tracking-[0.2em] text-slate-500">Pesquisa</p>
-            <h2 class="mt-2 text-2xl font-black tracking-tight text-slate-950">Encontra casos rapido</h2>
+        <section class="rounded-[24px] bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-black/[0.04]">
+          <div class="mb-5">
+            <h2 class="text-[22px] font-semibold tracking-tight text-[#1d1d1f]">Explorar</h2>
           </div>
 
-          <label class="relative block">
-            <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <label class="relative block mb-6">
+            <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#86868b]">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
             </span>
-            <input [value]="searchQuery" (input)="onSearchInput($any($event.target).value)" type="text" placeholder="Modelo, cor, localidade, rua ou detalhes..." class="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-12 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100">
+            <input [value]="searchQuery" (input)="onSearchInput($any($event.target).value)" type="text" placeholder="Pesquisar..." class="w-full rounded-[12px] bg-[#f5f5f7] pl-10 pr-10 py-[10px] text-[15px] text-[#1d1d1f] placeholder-[#86868b] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 focus:border-[#0066cc]">
             @if(searchQuery) {
-              <button type="button" (click)="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full px-2 py-1 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
-                Limpar
+              <button type="button" (click)="clearSearch()" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-[#86868b] hover:bg-[#e8e8ed]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             }
           </label>
 
-          <div class="mt-5 space-y-4">
+          <div class="space-y-5">
             <div>
-              <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Tipo</p>
-              <div class="flex flex-wrap gap-2">
-                <button (click)="setFilter('Todos')" [class.bg-slate-950]="filterType === 'Todos'" [class.text-white]="filterType === 'Todos'" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition">Todos</button>
-                <button (click)="setFilter('Perdido')" [class.bg-rose-600]="filterType === 'Perdido'" [class.text-white]="filterType === 'Perdido'" class="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition">Perdidos</button>
-                <button (click)="setFilter('Achado')" [class.bg-emerald-600]="filterType === 'Achado'" [class.text-white]="filterType === 'Achado'" class="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition">Achados</button>
+              <p class="mb-2 text-[12px] font-semibold text-[#86868b] uppercase tracking-wider">Filtro de Categoria</p>
+              <div class="flex flex-col gap-1">
+                <button (click)="setFilter('Todos')" [class.bg-[#f5f5f7]]="filterType === 'Todos'" [class.text-[#1d1d1f]]="filterType === 'Todos'" [class.font-medium]="filterType === 'Todos'" class="rounded-[10px] px-3 py-2 text-[14px] text-left text-[#515154] hover:bg-[#f5f5f7] transition">Todos</button>
+                <button (click)="setFilter('Perdido')" [class.bg-[#f5f5f7]]="filterType === 'Perdido'" [class.text-[#1d1d1f]]="filterType === 'Perdido'" [class.font-medium]="filterType === 'Perdido'" class="rounded-[10px] px-3 py-2 text-[14px] text-left text-[#515154] hover:bg-[#f5f5f7] transition">Perdidos</button>
+                <button (click)="setFilter('Achado')" [class.bg-[#f5f5f7]]="filterType === 'Achado'" [class.text-[#1d1d1f]]="filterType === 'Achado'" [class.font-medium]="filterType === 'Achado'" class="rounded-[10px] px-3 py-2 text-[14px] text-left text-[#515154] hover:bg-[#f5f5f7] transition">Achados</button>
               </div>
             </div>
 
+            <hr class="border-black/[0.04]">
+
             <div>
-              <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Estado</p>
-              <div class="flex flex-wrap gap-2">
-                <button (click)="setStatus('Todos')" [class.bg-slate-950]="filterStatus === 'Todos'" [class.text-white]="filterStatus === 'Todos'" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition">Todos</button>
-                <button (click)="setStatus('Ativo')" [class.bg-amber-500]="filterStatus === 'Ativo'" [class.text-white]="filterStatus === 'Ativo'" class="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition">Ativos</button>
-                <button (click)="setStatus('Pendente')" [class.bg-cyan-600]="filterStatus === 'Pendente'" [class.text-white]="filterStatus === 'Pendente'" class="rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700 transition">Pendentes</button>
+              <p class="mb-2 text-[12px] font-semibold text-[#86868b] uppercase tracking-wider">Estado de Resolução</p>
+              <div class="flex flex-col gap-1">
+                <button (click)="setStatus('Todos')" [class.bg-[#f5f5f7]]="filterStatus === 'Todos'" [class.text-[#1d1d1f]]="filterStatus === 'Todos'" [class.font-medium]="filterStatus === 'Todos'" class="rounded-[10px] px-3 py-2 text-[14px] text-left text-[#515154] hover:bg-[#f5f5f7] transition">Todos</button>
+                <button (click)="setStatus('Ativo')" [class.bg-[#f5f5f7]]="filterStatus === 'Ativo'" [class.text-[#1d1d1f]]="filterStatus === 'Ativo'" [class.font-medium]="filterStatus === 'Ativo'" class="rounded-[10px] px-3 py-2 text-[14px] text-left text-[#515154] hover:bg-[#f5f5f7] transition">Ativos</button>
+                <button (click)="setStatus('Pendente')" [class.bg-[#f5f5f7]]="filterStatus === 'Pendente'" [class.text-[#1d1d1f]]="filterStatus === 'Pendente'" [class.font-medium]="filterStatus === 'Pendente'" class="rounded-[10px] px-3 py-2 text-[14px] text-left text-[#515154] hover:bg-[#f5f5f7] transition">Pendentes</button>
               </div>
             </div>
 
+            <hr class="border-black/[0.04]">
+
             <div>
-              <label class="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Localidade</label>
-              <select [value]="selectedZone" (change)="onZoneChange($any($event.target).value)" class="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100">
-                <option value="">Todas as localidades</option>
+              <label class="mb-2 block text-[12px] font-semibold text-[#86868b] uppercase tracking-wider">Filtro Geográfico</label>
+              <select [value]="selectedZone" (change)="onZoneChange($any($event.target).value)" class="w-full rounded-[12px] bg-[#f5f5f7] px-3 py-[10px] text-[14px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-none">
+                <option value="">Todas as Localidades</option>
                 @for(location of locationOptions; track location) {
                   <option [value]="location">{{ location }}</option>
                 }
@@ -89,97 +92,88 @@
             </div>
           </div>
         </section>
-
-        <section class="rounded-[28px] border border-sky-200 bg-sky-50/90 p-5 shadow-lg shadow-sky-100/60">
-          <p class="text-xs font-black uppercase tracking-[0.2em] text-sky-600">Dica</p>
-          <p class="mt-3 text-sm leading-6 text-slate-700">
-            Seleciona a localidade no filtro e usa o campo de pesquisa para procurar ruas, bairros, estacoes ou referencias descritas nas publicacoes.
-          </p>
-        </section>
       </aside>
 
-      <section class="space-y-4">
+      <section class="space-y-6">
         @if(isFeedLoading) {
-          <div class="rounded-[28px] border border-white/70 bg-white/80 p-8 text-center shadow-lg shadow-slate-200/40">
-            <p class="text-sm font-semibold text-slate-500">A carregar feed...</p>
+          <div class="rounded-[24px] bg-white p-10 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-black/[0.04]">
+            <p class="text-[15px] font-medium text-[#86868b]">A carregar dados...</p>
           </div>
         }
 
         @if(!isFeedLoading && publications.length === 0) {
-          <div class="rounded-[32px] border border-dashed border-slate-300 bg-white/70 p-10 text-center shadow-sm">
-            <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
-              <svg class="h-10 w-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </div>
-            <p class="mt-4 text-xl font-black tracking-tight text-slate-950">Nenhum caso encontrado</p>
-            <p class="mt-2 text-sm text-slate-500">Ajusta os filtros ou tenta outra pesquisa.</p>
+          <div class="rounded-[24px] bg-white p-14 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-black/[0.04]">
+            <h2 class="text-[24px] font-semibold tracking-tight text-[#1d1d1f]">Nenhum registo encontrado</h2>
+            <p class="mt-2 text-[15px] text-[#86868b]">Não existem ocorrências com os filtros selecionados.</p>
           </div>
         }
 
         @for(pub of publications; track pub._id) {
-          <article class="overflow-hidden rounded-[32px] border border-white/80 bg-white/85 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.45)] backdrop-blur">
-            <div class="border-b border-slate-100 px-6 py-5 sm:px-8">
+          <article class="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-black/[0.03] transition-all hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)]">
+            <div class="px-6 py-5 sm:px-8 border-b border-[#f5f5f7]">
               <div class="flex items-start justify-between gap-4">
                 <div class="flex items-start gap-4">
-                  <div [ngClass]="pub.type === 'Perdido' ? 'bg-rose-500/10 text-rose-700 ring-rose-200' : 'bg-emerald-500/10 text-emerald-700 ring-emerald-200'" class="mt-1 rounded-2xl px-3 py-2 text-xs font-black uppercase tracking-[0.18em] ring-1">
-                    {{ pub.type }}
-                  </div>
                   <div>
-                    <div class="flex flex-wrap items-center gap-2">
-                      <h3 class="text-2xl font-black tracking-tight text-slate-950">{{ pub.model }}</h3>
-                      <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">{{ pub.createdAt | date:'dd/MM HH:mm' }}</span>
+                    <div class="flex items-center gap-2 mb-1">
+                      <span [ngClass]="pub.type === 'Perdido' ? 'bg-[#fff2f2] text-[#e30000]' : 'bg-[#f0fdf4] text-[#15803d]'" class="rounded-[6px] px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase">
+                        {{ pub.type }}
+                      </span>
+                      <span class="text-[13px] font-medium text-[#86868b]">{{ pub.createdAt | date:'dd MMM HH:mm' }}</span>
                     </div>
-                    <p class="mt-2 text-sm text-slate-500">
-                      Reportado por <span class="font-semibold text-slate-700">{{ pub.author?.email }}</span>
-                    </p>
+                    <h3 class="text-[24px] font-semibold tracking-tight text-[#1d1d1f]">{{ pub.model }}</h3>
+                    <p class="text-[13px] text-[#86868b] mt-1">Reportado por <span class="font-medium text-[#1d1d1f]">{{ pub.author?.email }}</span></p>
                   </div>
                 </div>
 
-                <div [ngClass]="pub.status === 'Ativo' ? 'bg-amber-100 text-amber-700' : pub.status === 'Pendente' ? 'bg-cyan-100 text-cyan-700' : 'bg-slate-200 text-slate-700'" class="rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.16em]">
+                <div [ngClass]="pub.status === 'Ativo' ? 'bg-[#fff8e6] text-[#b58000]' : pub.status === 'Pendente' ? 'bg-[#f0f8ff] text-[#0066cc]' : 'bg-[#f5f5f7] text-[#86868b]'" class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider">
                   {{ pub.status }}
                 </div>
               </div>
             </div>
 
             <div class="space-y-5 px-6 py-6 sm:px-8">
-              <p class="text-base leading-7 text-slate-700">
-                <span class="font-semibold text-slate-950">Cor:</span> {{ pub.color }}
-                <span class="mx-2 text-slate-300">|</span>
-                <span class="font-semibold text-slate-950">Capacidade:</span> {{ pub.storage || 'Nao indicada' }}
-              </p>
+              <div class="flex bg-[#f5f5f7] rounded-[14px] p-4 gap-6 text-[14px]">
+                <div>
+                  <span class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Cor</span> 
+                  <span class="font-medium text-[#1d1d1f]">{{ pub.color }}</span>
+                </div>
+                <div class="w-px bg-[#d2d2d7]"></div>
+                <div>
+                  <span class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Capacidade</span> 
+                  <span class="font-medium text-[#1d1d1f]">{{ pub.storage || 'Não indicada' }}</span>
+                </div>
+              </div>
 
-              <div class="grid gap-4 md:grid-cols-2">
-                <section class="rounded-3xl bg-slate-50 p-5">
-                  <p class="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Localidade</p>
-                  <p class="mt-3 text-lg font-bold text-slate-900">{{ pub.zone }}</p>
-                  <p class="mt-2 text-sm leading-6 text-slate-600">{{ pub.exactLocation || 'Sem rua ou referencia adicional.' }}</p>
+              <div class="grid gap-3 md:grid-cols-2">
+                <section class="rounded-[16px] border border-black/[0.04] p-5">
+                  <p class="text-[11px] font-semibold uppercase tracking-wider text-[#86868b]">Localização de Ocorrência</p>
+                  <p class="mt-2 text-[17px] font-medium text-[#1d1d1f]">{{ pub.zone }}</p>
+                  <p class="mt-1 text-[14px] text-[#515154]">{{ pub.exactLocation || 'Sem referência detalhada.' }}</p>
                 </section>
 
-                <section class="rounded-3xl bg-slate-50 p-5">
-                  <p class="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Detalhes</p>
-                  <p class="mt-3 text-sm leading-6 text-slate-700">
+                <section class="rounded-[16px] border border-black/[0.04] p-5">
+                  <p class="text-[11px] font-semibold uppercase tracking-wider text-[#86868b]">Informações Adicionais</p>
+                  <p class="mt-2 text-[14px] text-[#515154]">
                     {{ pub.distinctiveMarks || 'Sem marcas distintivas descritas.' }}
                   </p>
                   @if(pub.imei) {
-                    <p class="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">IMEI: {{ pub.imei }}</p>
+                    <p class="mt-3 text-[12px] font-medium text-[#1d1d1f]">IMEI: <span class="text-[#515154]">{{ pub.imei }}</span></p>
                   }
                 </section>
               </div>
 
-              <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5">
-                <div class="text-sm text-slate-500">
-                  Data da ocorrencia:
-                  <span class="font-semibold text-slate-700">{{ pub.dateOfEvent | date:'dd/MM/yyyy' }}</span>
+              <div class="flex items-center justify-between pt-4">
+                <div class="text-[13px] text-[#86868b]">
+                  Data do Evento: <span class="font-medium text-[#1d1d1f]">{{ pub.dateOfEvent | date:'dd/MM/yyyy' }}</span>
                 </div>
 
                 @if(!isOwnPublication(pub)) {
-                  <button (click)="openChat(pub)" class="rounded-full bg-gradient-to-r from-sky-500 via-cyan-500 to-blue-700 px-5 py-3 text-sm font-black text-white shadow-lg shadow-sky-500/20 transition hover:scale-[1.02]">
-                    Comunicar
+                  <button (click)="openChat(pub)" class="rounded-full bg-[#0066cc] px-5 py-2 text-[14px] font-medium text-white transition hover:bg-[#005bb5]">
+                    Enviar Mensagem
                   </button>
                 } @else {
-                  <button (click)="openOwnPublicationChats(pub)" class="rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 transition hover:bg-slate-200 hover:text-slate-700">
-                    A tua comunicacao
+                  <button (click)="openOwnPublicationChats(pub)" class="rounded-full bg-[#f5f5f7] px-4 py-2 text-[13px] font-medium text-[#1d1d1f] transition hover:bg-[#e8e8ed]">
+                    Ver Mensagens
                   </button>
                 }
               </div>
@@ -189,50 +183,47 @@
       </section>
 
       <aside class="space-y-4 lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)]">
-        <section class="flex h-full flex-col overflow-hidden rounded-[32px] border border-white/80 bg-slate-950 text-white shadow-[0_30px_100px_-45px_rgba(15,23,42,0.8)]">
+        <section class="flex h-[500px] flex-col overflow-hidden rounded-[24px] bg-[#1d1d1f] text-white shadow-[0_12px_40px_rgba(0,0,0,0.12)]">
           <div class="border-b border-white/10 px-5 py-5">
-            <p class="text-xs font-black uppercase tracking-[0.2em] text-cyan-200">Conversas</p>
-            <div class="mt-2 flex items-start justify-between gap-3">
+            <div class="mt-1 flex items-start justify-between gap-3">
               <div>
-                <h3 class="text-2xl font-black tracking-tight">Inbox privado</h3>
-                <p class="mt-2 text-sm text-slate-300">Abre uma pagina dedicada com todas as pessoas com quem ja falaste.</p>
+                <h3 class="text-[20px] font-semibold tracking-tight">Caixa de Entrada</h3>
+                <p class="mt-1 text-[13px] text-[#a1a1a6]">Gestão de contactos abertos.</p>
               </div>
-              <button (click)="openChatsPage()" class="rounded-full border border-white/15 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-cyan-200 transition hover:bg-white/10 hover:text-white">
-                Abrir
+              <button (click)="openChatsPage()" class="rounded-full bg-white/10 px-3 py-[6px] text-[12px] font-medium text-white transition hover:bg-white/20">
+                Ver Tudo
               </button>
             </div>
           </div>
 
-          <div class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+          <div class="min-h-0 flex-1 overflow-y-auto px-4 py-3">
             @if(conversationError) {
-              <div class="mb-3 rounded-3xl border border-rose-400/30 bg-rose-500/10 p-4 text-sm text-rose-200">
+              <div class="mb-3 rounded-[12px] bg-[#331c19] px-4 py-3 text-[13px] text-[#ff8a8a]">
                 {{ conversationError }}
               </div>
             }
 
             @if(isConversationLoading) {
-              <div class="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+              <div class="p-4 text-[13px] text-[#a1a1a6] text-center">
                 A carregar conversas...
               </div>
             }
 
             @if(!isConversationLoading && conversations.length === 0) {
-              <div class="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-                Ainda nao tens conversas. Usa o botao <span class="font-bold text-white">Comunicar</span> num caso do feed.
+              <div class="p-6 text-center text-[#a1a1a6]">
+                <p class="text-[14px]">Nenhuma conversa atual.</p>
               </div>
             }
 
             <div class="space-y-2">
               @for(conversation of conversations; track conversation._id) {
-                <button (click)="openExistingConversation(conversation._id)" class="w-full rounded-3xl border border-white/10 bg-white/5 p-4 text-left text-white transition hover:bg-white/10">
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                      <p class="truncate text-sm font-black">{{ getConversationPartner(conversation)?.email || 'Conversa' }}</p>
-                      <p class="mt-1 truncate text-xs opacity-70">{{ conversation.publication?.model }} · {{ conversation.publication?.zone }}</p>
-                    </div>
-                    <span class="text-[10px] font-semibold uppercase tracking-[0.14em] opacity-60">{{ conversation.updatedAt | date:'HH:mm' }}</span>
+                <button (click)="openExistingConversation(conversation._id)" class="w-full rounded-[14px] bg-white/5 p-4 text-left text-white transition hover:bg-white/10">
+                  <div class="flex items-start justify-between mb-1">
+                    <p class="truncate text-[14px] font-medium">{{ getConversationPartner(conversation)?.email || 'Utilizador' }}</p>
+                    <span class="text-[11px] text-[#a1a1a6] mt-0.5">{{ conversation.updatedAt | date:'HH:mm' }}</span>
                   </div>
-                  <p class="mt-3 truncate text-sm opacity-80">{{ getLastMessagePreview(conversation) }}</p>
+                  <p class="truncate text-[12px] text-[#a1a1a6]">{{ conversation.publication?.model }} · {{ conversation.publication?.zone }}</p>
+                  <p class="mt-2 truncate text-[13px] text-[#d2d2d7] font-medium">{{ getLastMessagePreview(conversation) }}</p>
                 </button>
               }
             </div>
@@ -243,106 +234,99 @@
   }
 
   @if(viewMode === 'create') {
-    <main class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-      <div class="overflow-hidden rounded-[36px] border border-white/80 bg-white/90 shadow-[0_30px_100px_-45px_rgba(15,23,42,0.45)] backdrop-blur">
-        <div class="bg-slate-950 px-8 py-8 text-center text-white">
-          <p class="text-xs font-black uppercase tracking-[0.22em] text-cyan-200">Nova comunicacao</p>
-          <h2 class="mt-3 text-3xl font-black tracking-tight">Adicionar ao feed global</h2>
-          <p class="mt-3 text-sm text-slate-300">Seleciona a localidade e descreve a rua, bairro, estacao ou zona aproximada no campo abaixo.</p>
+    <main class="mx-auto max-w-[800px] px-4 py-10 sm:px-6 lg:px-8">
+      <div class="overflow-hidden rounded-[24px] bg-white shadow-[0_12px_40px_rgba(0,0,0,0.06)] border border-black/[0.04]">
+        <div class="px-10 py-10 border-b border-black/[0.04] text-center bg-[#f5f5f7]/50">
+          <h2 class="text-[32px] font-semibold tracking-tight text-[#1d1d1f]">Comunicar Ocorrência</h2>
+          <p class="mt-2 text-[15px] text-[#86868b]">Preencha as informações detalhadamente para facilitar a identificação e alertar a comunidade iFound.</p>
         </div>
 
-        <form [formGroup]="pubForm" (ngSubmit)="onSubmitPublication()" class="space-y-6 px-8 py-8">
+        <form [formGroup]="pubForm" (ngSubmit)="onSubmitPublication()" class="space-y-8 px-10 py-10">
           @if(message) {
-            <div class="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">{{ message }}</div>
+            <div class="rounded-[14px] bg-[#fff2f2] px-4 py-4 text-[14px] font-medium text-[#e30000]">{{ message }}</div>
           }
 
           <div>
-            <label class="mb-3 block text-sm font-bold text-slate-700">Tipo de ocorrencia</label>
+            <label class="mb-3 block text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Natureza da Ocorrência</label>
             <div class="grid gap-4 sm:grid-cols-2">
               <label class="cursor-pointer">
                 <input type="radio" formControlName="type" value="Perdido" class="peer sr-only">
-                <div class="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-center font-bold text-slate-700 transition peer-checked:border-rose-400 peer-checked:bg-rose-50 peer-checked:text-rose-700">
-                  Perdi o meu iPhone
+                <div class="rounded-[14px] border-2 border-transparent bg-[#f5f5f7] px-5 py-4 text-center font-medium text-[#1d1d1f] transition peer-checked:border-[#e30000] peer-checked:bg-[#fff2f2]">
+                  Perdi o meu dispositivo
                 </div>
               </label>
               <label class="cursor-pointer">
                 <input type="radio" formControlName="type" value="Achado" class="peer sr-only">
-                <div class="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-center font-bold text-slate-700 transition peer-checked:border-emerald-400 peer-checked:bg-emerald-50 peer-checked:text-emerald-700">
-                  Encontrei um iPhone
+                <div class="rounded-[14px] border-2 border-transparent bg-[#f5f5f7] px-5 py-4 text-center font-medium text-[#1d1d1f] transition peer-checked:border-[#15803d] peer-checked:bg-[#f0fdf4]">
+                  Encontrei um dispositivo
                 </div>
               </label>
             </div>
           </div>
 
-          <div class="grid gap-5 md:grid-cols-2">
+          <div class="w-full h-px bg-[#f5f5f7]"></div>
+
+          <div class="grid gap-6 md:grid-cols-2">
             <label class="space-y-2">
-              <span class="text-sm font-bold text-slate-700">Modelo *</span>
-              <select formControlName="model" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100">
-                <option value="" disabled selected>Selecionar modelo</option>
+              <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Equipamento *</span>
+              <select formControlName="model" class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent">
+                <option value="" disabled selected>Selecionar versão</option>
                 @for(m of modelosIphone; track m) {
                   <option [value]="m">{{ m }}</option>
                 }
               </select>
-              @if(isFieldInvalid('model')) {
-                <span class="block text-sm font-semibold text-rose-600">O modelo e obrigatorio.</span>
-              }
             </label>
 
             <label class="space-y-2">
-              <span class="text-sm font-bold text-slate-700">Cor *</span>
-              <input type="text" formControlName="color" placeholder="Ex: Azul Meia-Noite" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100">
-              @if(isFieldInvalid('color')) {
-                <span class="block text-sm font-semibold text-rose-600">A cor e obrigatoria.</span>
-              }
+              <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Acabamento *</span>
+              <input type="text" formControlName="color" placeholder="Ex. Preto Sideral" class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent">
             </label>
 
             <label class="space-y-2">
-              <span class="text-sm font-bold text-slate-700">Capacidade</span>
-              <input type="text" formControlName="storage" placeholder="Ex: 128GB" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100">
+              <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Armazenamento</span>
+              <input type="text" formControlName="storage" placeholder="Ex. 256 GB" class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent">
             </label>
 
             <label class="space-y-2">
-              <span class="text-sm font-bold text-slate-700">IMEI parcial ou completo</span>
-              <input type="text" formControlName="imei" placeholder="Opcional" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100">
+              <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">IMEI (Opcional)</span>
+              <input type="text" formControlName="imei" placeholder="Número de série para registo de segurança" class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent">
             </label>
           </div>
 
           <label class="block space-y-2">
-            <span class="text-sm font-bold text-slate-700">Marcas distintivas</span>
-            <textarea formControlName="distinctiveMarks" rows="3" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100"></textarea>
+            <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Descrição Física</span>
+            <textarea formControlName="distinctiveMarks" rows="3" placeholder="Arranhões, capa, wallpaper visível..." class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent resize-none"></textarea>
           </label>
 
-          <div class="grid gap-5 md:grid-cols-2">
+          <div class="w-full h-px bg-[#f5f5f7]"></div>
+
+          <div class="grid gap-6 md:grid-cols-2">
             <label class="space-y-2">
-              <span class="text-sm font-bold text-slate-700">Localidade *</span>
-              <select formControlName="zone" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100">
-                <option value="" disabled selected>Selecionar localidade</option>
+              <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Distrito / Localidade *</span>
+              <select formControlName="zone" class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent">
+                <option value="" disabled selected>Selecionar zona de Portugal</option>
                 @for(location of locationOptions; track location) {
                   <option [value]="location">{{ location }}</option>
                 }
               </select>
-              @if(isFieldInvalid('zone')) {
-                <span class="block text-sm font-semibold text-rose-600">A localidade e obrigatoria.</span>
-              }
             </label>
 
             <label class="space-y-2">
-              <span class="text-sm font-bold text-slate-700">Data da ocorrencia *</span>
-              <input type="date" formControlName="dateOfEvent" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100">
-              @if(isFieldInvalid('dateOfEvent')) {
-                <span class="block text-sm font-semibold text-rose-600">A data da ocorrencia e obrigatoria.</span>
-              }
+              <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Data do Incidente *</span>
+              <input type="date" formControlName="dateOfEvent" class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent">
             </label>
           </div>
 
           <label class="block space-y-2">
-            <span class="text-sm font-bold text-slate-700">Rua, bairro ou zona aproximada</span>
-            <input type="text" formControlName="exactLocation" placeholder="Ex: Gare do Oriente, perto da entrada principal" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100">
+            <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Localização Exata</span>
+            <input type="text" formControlName="exactLocation" placeholder="Ex. Gare do Oriente, carruagem frente" class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent">
           </label>
 
-          <button type="submit" [disabled]="isLoading" class="w-full rounded-2xl bg-gradient-to-r from-slate-950 via-slate-800 to-cyan-700 px-6 py-4 text-lg font-black text-white shadow-lg shadow-slate-950/20 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60">
-            {{ isLoading ? 'A publicar...' : 'Publicar no feed global' }}
-          </button>
+          <div class="pt-4">
+            <button type="submit" [disabled]="isLoading" class="w-full rounded-[14px] bg-[#0066cc] px-6 py-[16px] text-[17px] font-medium text-white transition hover:bg-[#005bb5] disabled:cursor-not-allowed disabled:opacity-50">
+              {{ isLoading ? 'A carregar dados...' : 'Submeter Anúncio' }}
+            </button>
+          </div>
         </form>
       </div>
     </main>

@@ -57,6 +57,37 @@ const send2FAEmail = async (email, code) => {
   }
 };
 
+const sendPasswordResetEmail = async (email, code) => {
+  try {
+    const transporter = getMailTransporter();
+    const from = process.env.MAIL_FROM || process.env.SMTP_USER;
+
+    await transporter.sendMail({
+      from,
+      to: email,
+      subject: "Recuperacao de Palavra-passe Ifound",
+      text: `O seu codigo de recuperacao e: ${code}\n\nEste codigo expira em 15 minutos.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
+          <h2 style="margin-bottom: 12px;">Ifound</h2>
+          <p>O seu codigo de recuperacao e:</p>
+          <p style="font-size: 28px; font-weight: 700; letter-spacing: 4px; margin: 16px 0;">${code}</p>
+          <p>Este codigo expira em 15 minutos. Se não pediu, pode ignorar este email.</p>
+        </div>
+      `,
+    });
+
+    return { deliveryMode: "email" };
+  } catch (error) {
+    if (error.message === "SMTP_NOT_CONFIGURED") {
+      console.warn("SMTP nao configurado. A devolver codigo reset em modo local.");
+      return { deliveryMode: "dev", devCode: code };
+    }
+
+    throw error;
+  }
+};
+
 router.post("/register", async (req, res) => {
   try {
     const { email, password, nif, rgpdConsent } = req.body;
@@ -177,6 +208,65 @@ router.post("/verify-2fa", async (req, res) => {
     res.json({ token, message: "Login efetuado com sucesso!" });
   } catch (error) {
     res.status(500).json({ message: "Erro na verificacao do codigo." });
+  }
+});
+
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Nenhuma conta encontrada com este email." });
+    }
+
+    const code = generate2FACode();
+    user.resetPasswordSecret = code;
+    user.resetPasswordExpires = new Date(Date.now() + 15 * 60000); // 15 mins
+    await user.save();
+
+    const delivery = await sendPasswordResetEmail(user.email, code);
+
+    res.json({
+      message: delivery.deliveryMode === "email" 
+        ? "Codigo de recuperacao enviado para o seu email."
+        : "SMTP nao configurado. Codigo disponibilizado localmente.",
+      ...delivery
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao processar o pedido de recuperacao." });
+  }
+});
+
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: "A palavra-passe tem de ter no minimo 6 caracteres." });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Utilizador nao encontrado." });
+    }
+
+    if (!user.resetPasswordSecret || user.resetPasswordSecret !== code || user.resetPasswordExpires < new Date()) {
+      return res.status(400).json({ message: "Codigo invalido ou expirado." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    user.passwordHash = passwordHash;
+    user.resetPasswordSecret = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    res.json({ message: "Palavra-passe alterada com sucesso! Facar login." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao atualizar a palavra-passe." });
   }
 });
 

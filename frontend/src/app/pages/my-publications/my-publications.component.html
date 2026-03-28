@@ -1,148 +1,158 @@
-<div class="min-h-screen bg-[radial-gradient(circle_at_top,_#dbeafe_0%,_#f8fafc_28%,_#e2e8f0_100%)] text-slate-800">
-  <nav class="sticky top-0 z-40 border-b border-white/70 bg-white/80 backdrop-blur-xl shadow-sm">
-    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans selection:bg-[#0066cc]/20">
+  <nav class="sticky top-0 z-40 border-b border-black/[0.04] bg-white/70 backdrop-blur-2xl">
+    <div class="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
       <div class="flex items-center gap-3">
-        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 via-cyan-500 to-blue-700 shadow-lg shadow-sky-500/20">
-          <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2m6 0A10 10 0 1112 2a10 10 0 0110 10z"></path>
+        <div class="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#1d1d1f] shadow-sm">
+          <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6l4 2m6 0A10 10 0 1112 2a10 10 0 0110 10z"></path>
           </svg>
         </div>
         <div>
-          <p class="text-lg font-black tracking-tight text-slate-950">As suas publicacoes</p>
-          <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Gestao dos seus anuncios</p>
+          <p class="text-[19px] font-semibold tracking-tight text-[#1d1d1f]">iFound</p>
+          <p class="text-[11px] font-medium tracking-[0.06em] text-[#86868b]">Os Seus Anúncios</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3">
-        <a routerLink="/dashboard" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-950">
-          Feed
+        <a routerLink="/dashboard" class="rounded-full bg-transparent px-4 py-[6px] text-[13px] font-medium text-[#1d1d1f] transition duration-200 hover:bg-black/5">
+          Feed Global
         </a>
-        <a routerLink="/conversas" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-950">
-          Conversas
+        <a routerLink="/conversas" class="rounded-full bg-transparent px-4 py-[6px] text-[13px] font-medium text-[#1d1d1f] transition duration-200 hover:bg-black/5">
+          Inbox
         </a>
-        <button (click)="logout()" class="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100">
+        <button (click)="logout()" class="rounded-full bg-transparent px-4 py-[6px] text-[13px] font-medium text-[#e30000] transition duration-200 hover:bg-[#fff2f2]">
           Sair
         </button>
       </div>
     </div>
   </nav>
 
-  <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-    <section class="mb-6 rounded-[32px] border border-white/80 bg-white/85 p-6 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.45)] backdrop-blur">
-      <div class="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p class="text-xs font-black uppercase tracking-[0.2em] text-sky-600">Resumo</p>
-          <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-950">Controle o estado das suas publicacoes</h1>
-          <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-            Cada utilizador pode ter no maximo <span class="font-bold text-slate-900">3 publicacoes online</span>.
-            As publicacoes ficam online ate <span class="font-bold text-slate-900">90 dias</span>. Se um caso ficar
-            <span class="font-bold text-slate-900">Pendente</span> durante 30 dias, passa automaticamente para offline.
-            Quando o marca como <span class="font-bold text-slate-900">Resolvido</span>, ele sai logo do feed e fica visivel aqui apenas durante 5 minutos.
+  <main class="mx-auto max-w-[1200px] px-4 py-8 sm:px-6 lg:px-8">
+    <section class="mb-8 rounded-[24px] bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-black/[0.04]">
+      <div class="flex flex-wrap items-center justify-between gap-6">
+        <div class="max-w-[700px]">
+          <h1 class="text-[28px] font-semibold tracking-tight text-[#1d1d1f] mb-3 leading-tight">Gestão de Publicações</h1>
+          <p class="text-[15px] leading-relaxed text-[#515154]">
+            Pode manter até <span class="font-medium text-[#1d1d1f]">3 anúncios ativos simultaneamente</span> por um período máximo de <span class="font-medium text-[#1d1d1f]">90 dias</span>. 
+            Anúncios <span class="font-medium text-[#1d1d1f]">Pendentes</span> expiram automaticamente após 30 dias de inatividade. 
+            Ao assinalar como <span class="font-medium text-[#1d1d1f]">Resolvido</span>, o registo será instantaneamente removido do feed público.
           </p>
         </div>
 
-        <div class="rounded-3xl bg-slate-950 px-5 py-4 text-white shadow-lg">
-          <p class="text-xs font-black uppercase tracking-[0.18em] text-cyan-200">Online agora</p>
-          <p class="mt-2 text-3xl font-black">{{ getOnlineCount() }}/3</p>
+        <div class="min-w-[160px] rounded-[18px] bg-[#f5f5f7] px-6 py-5 text-center border border-black/[0.02]">
+          <p class="text-[12px] font-semibold uppercase tracking-wider text-[#86868b]">Itens Online</p>
+          <p class="mt-1 text-[32px] font-semibold text-[#1d1d1f]">{{ getOnlineCount() }}<span class="text-[#86868b] text-[20px]">/3</span></p>
         </div>
       </div>
     </section>
 
     @if(message) {
-      <div class="mb-6 rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+      <div class="mb-6 rounded-[14px] bg-[#f0f8ff] px-4 py-4 text-[14px] font-medium text-[#0066cc]">
         {{ message }}
       </div>
     }
 
     @if(isLoading) {
-      <div class="rounded-[28px] border border-white/70 bg-white/80 p-8 text-center shadow-lg shadow-slate-200/40">
-        <p class="text-sm font-semibold text-slate-500">A carregar as suas publicacoes...</p>
+      <div class="rounded-[24px] bg-white p-10 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-black/[0.04]">
+        <p class="text-[15px] font-medium text-[#86868b]">A carregar as publicações...</p>
       </div>
     }
 
     @if(!isLoading && publications.length === 0) {
-      <div class="rounded-[32px] border border-dashed border-slate-300 bg-white/70 p-10 text-center shadow-sm">
-        <p class="text-xl font-black tracking-tight text-slate-950">Ainda nao publicou nenhum caso</p>
-        <p class="mt-2 text-sm text-slate-500">Crie uma publicacao no feed para ela aparecer aqui.</p>
+      <div class="rounded-[24px] bg-white p-14 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-black/[0.04]">
+        <h2 class="text-[24px] font-semibold tracking-tight text-[#1d1d1f]">Ainda sem histórico</h2>
+        <p class="mt-2 text-[15px] text-[#86868b]">Não submeteu nenhuma ocorrência para o feed público.</p>
       </div>
     }
 
     @if(!isLoading && publications.length > 0) {
-      <div class="grid gap-4 lg:grid-cols-2">
+      <div class="grid gap-6 lg:grid-cols-2">
         @for(publication of publications; track publication._id) {
-          <article class="overflow-hidden rounded-[32px] border border-white/80 bg-white/90 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.45)] backdrop-blur">
-            <div class="border-b border-slate-100 px-6 py-5">
+          <article class="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-black/[0.03] transition-all hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] flex flex-col">
+            
+            <div class="px-6 py-5 sm:px-8 border-b border-[#f5f5f7]">
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <div class="flex flex-wrap items-center gap-2">
-                    <span [ngClass]="publication.type === 'Perdido' ? 'bg-rose-500/10 text-rose-700 ring-rose-200' : 'bg-emerald-500/10 text-emerald-700 ring-emerald-200'" class="rounded-2xl px-3 py-2 text-xs font-black uppercase tracking-[0.18em] ring-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span [ngClass]="publication.type === 'Perdido' ? 'bg-[#fff2f2] text-[#e30000]' : 'bg-[#f0fdf4] text-[#15803d]'" class="rounded-[6px] px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase">
                       {{ publication.type }}
                     </span>
-                    <h2 class="text-2xl font-black tracking-tight text-slate-950">{{ publication.model }}</h2>
                   </div>
-                  <p class="mt-3 text-sm text-slate-500">
-                    {{ publication.zone }} · {{ publication.exactLocation || 'Sem referencia adicional' }}
+                  <h2 class="text-[24px] font-semibold tracking-tight text-[#1d1d1f]">{{ publication.model }}</h2>
+                  <p class="mt-1 text-[13px] text-[#86868b]">
+                    {{ publication.zone }} · {{ publication.exactLocation || 'Sem referência detalhada' }}
                   </p>
                 </div>
-
-                <span [ngClass]="getStatusClasses(publication.status)" class="rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.16em]">
+                <span [ngClass]="publication.status === 'Ativo' ? 'bg-[#fff8e6] text-[#b58000]' : publication.status === 'Pendente' ? 'bg-[#f0f8ff] text-[#0066cc]' : publication.status === 'Resolvido' ? 'bg-[#f0fdf4] text-[#15803d]' : 'bg-[#f5f5f7] text-[#86868b]'" class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider">
                   {{ publication.status }}
                 </span>
               </div>
             </div>
 
-            <div class="space-y-5 px-6 py-6">
-              <div class="grid gap-4 sm:grid-cols-2">
-                <div class="rounded-3xl bg-slate-50 p-4">
-                  <p class="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Online ate</p>
-                  <p class="mt-2 text-sm font-semibold text-slate-900">{{ getOnlineUntil(publication) | date:'dd/MM/yyyy' }}</p>
+            <div class="px-6 py-6 sm:px-8 flex-1 flex flex-col justify-between">
+              <div class="space-y-5">
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <div class="rounded-[16px] border border-black/[0.04] p-4 text-center">
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-[#86868b]">Limite Online</p>
+                    <p class="mt-1 text-[15px] font-medium text-[#1d1d1f]">{{ getOnlineUntil(publication) | date:'dd/MM/yyyy' }}</p>
+                  </div>
+                  <div class="rounded-[16px] border border-black/[0.04] p-4 text-center">
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-[#86868b]">Expiração Pendente</p>
+                    <p class="mt-1 text-[15px] font-medium text-[#1d1d1f]">
+                      {{ getPendingUntil(publication) ? (getPendingUntil(publication) | date:'dd/MM/yyyy') : 'N/A' }}
+                    </p>
+                  </div>
                 </div>
 
-                <div class="rounded-3xl bg-slate-50 p-4">
-                  <p class="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Pendente ate</p>
-                  <p class="mt-2 text-sm font-semibold text-slate-900">
-                    {{ getPendingUntil(publication) ? (getPendingUntil(publication) | date:'dd/MM/yyyy') : 'Nao aplicavel' }}
-                  </p>
+                @if(publication.status === 'Resolvido') {
+                  <div class="rounded-[12px] bg-[#f0fdf4] p-4 text-[13px] text-[#15803d] font-medium">
+                    Registo solucionado e oculto do feed. Será apagado automaticamente em poucos minutos.
+                  </div>
+                }
+
+                <div class="flex bg-[#f5f5f7] rounded-[14px] p-4 gap-6 text-[14px]">
+                  <div>
+                    <span class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Cor</span> 
+                    <span class="font-medium text-[#1d1d1f]">{{ publication.color }}</span>
+                  </div>
+                  <div class="w-px bg-[#d2d2d7]"></div>
+                  <div>
+                    <span class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Capacidade</span> 
+                    <span class="font-medium text-[#1d1d1f]">{{ publication.storage || 'N/A' }}</span>
+                  </div>
+                  <div class="w-px bg-[#d2d2d7] hidden sm:block"></div>
+                  <div class="hidden sm:block">
+                    <span class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Data</span> 
+                    <span class="font-medium text-[#1d1d1f]">{{ publication.dateOfEvent | date:'dd/MM/yyyy' }}</span>
+                  </div>
                 </div>
               </div>
 
-              @if(publication.status === 'Resolvido') {
-                <div class="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                  Esta publicacao foi resolvida e desapareceu do feed. Vai continuar visivel aqui ate
-                  <span class="font-bold">{{ getResolvedUntil(publication) | date:'HH:mm:ss' }}</span>.
-                </div>
-              }
-
-              <div class="rounded-3xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                <p><span class="font-semibold text-slate-900">Cor:</span> {{ publication.color }}</p>
-                <p><span class="font-semibold text-slate-900">Capacidade:</span> {{ publication.storage || 'Nao indicada' }}</p>
-                <p><span class="font-semibold text-slate-900">Data da ocorrencia:</span> {{ publication.dateOfEvent | date:'dd/MM/yyyy' }}</p>
-              </div>
-
-              <div class="border-t border-slate-100 pt-5">
+              <div class="pt-6 mt-6 border-t border-[#f5f5f7]">
                 @if(publication.status !== 'Offline' && publication.status !== 'Resolvido') {
-                  <p class="mb-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500">Alterar estado</p>
+                  <p class="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#86868b]">Estado Atual</p>
                   <div class="flex flex-wrap gap-2">
-                    <button (click)="updateStatus(publication, 'Ativo')" [disabled]="updatingPublicationId === publication._id" [class.bg-amber-500]="publication.status === 'Ativo'" [class.text-white]="publication.status === 'Ativo'" class="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition disabled:cursor-not-allowed disabled:opacity-60">
+                    <button (click)="updateStatus(publication, 'Ativo')" [disabled]="updatingPublicationId === publication._id" [class.bg-[#1d1d1f]]="publication.status === 'Ativo'" [class.text-white]="publication.status === 'Ativo'" [class.bg-[#f5f5f7]]="publication.status !== 'Ativo'" [class.text-[#1d1d1f]]="publication.status !== 'Ativo'" class="rounded-full px-4 py-2 text-[13px] font-medium transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50">
                       Ativo
                     </button>
-                    <button (click)="updateStatus(publication, 'Pendente')" [disabled]="updatingPublicationId === publication._id" [class.bg-cyan-600]="publication.status === 'Pendente'" [class.text-white]="publication.status === 'Pendente'" class="rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700 transition disabled:cursor-not-allowed disabled:opacity-60">
+                    <button (click)="updateStatus(publication, 'Pendente')" [disabled]="updatingPublicationId === publication._id" [class.bg-[#0066cc]]="publication.status === 'Pendente'" [class.text-white]="publication.status === 'Pendente'" [class.bg-[#f5f5f7]]="publication.status !== 'Pendente'" [class.text-[#1d1d1f]]="publication.status !== 'Pendente'" class="rounded-full px-4 py-2 text-[13px] font-medium transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50">
                       Pendente
                     </button>
-                    <button (click)="updateStatus(publication, 'Resolvido')" [disabled]="updatingPublicationId === publication._id" [class.bg-emerald-600]="publication.status === 'Resolvido'" [class.text-white]="publication.status === 'Resolvido'" class="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition disabled:cursor-not-allowed disabled:opacity-60">
+                    <button (click)="updateStatus(publication, 'Resolvido')" [disabled]="updatingPublicationId === publication._id" [class.bg-[#15803d]]="publication.status === 'Resolvido'" [class.text-white]="publication.status === 'Resolvido'" [class.bg-[#f5f5f7]]="publication.status !== 'Resolvido'" [class.text-[#1d1d1f]]="publication.status !== 'Resolvido'" class="rounded-full px-4 py-2 text-[13px] font-medium transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50">
                       Resolvido
                     </button>
                   </div>
                 } @else if (publication.status === 'Offline') {
-                  <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                    Esta publicacao ficou offline automaticamente. Continua visivel nesta pagina, mas ja nao aparece no feed.
+                  <div class="rounded-[12px] bg-[#f5f5f7] p-4 text-[13px] text-[#86868b]">
+                    Anúncio offline de forma automática. Permanece em histórico apenas para consulta local.
                   </div>
                 } @else {
-                  <div class="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                    O caso foi marcado como resolvido e sera removido automaticamente desta lista ao fim de 5 minutos.
+                  <div class="rounded-[12px] bg-[#f5f5f7] p-4 text-[13px] text-[#86868b]">
+                    Processo de resolução concluído. O sistema fará a limpeza pendente do registo em breve.
                   </div>
                 }
               </div>
+
             </div>
           </article>
         }

@@ -11,6 +11,10 @@ const userSchema = new mongoose.Schema(
     twoFactorExpires: { type: Date },
     isVerified: { type: Boolean, default: false },
 
+    // Password Reset
+    resetPasswordSecret: { type: String },
+    resetPasswordExpires: { type: Date },
+
     // Legal / GDPR Consent
     rgpdConsent: { type: Boolean, required: true },
     consentDate: { type: Date, default: Date.now },

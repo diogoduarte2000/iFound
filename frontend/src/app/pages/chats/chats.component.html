@@ -1,181 +1,170 @@
-<div class="min-h-screen bg-[radial-gradient(circle_at_top,_#e0f2fe_0%,_#f8fafc_32%,_#e2e8f0_100%)] text-slate-800">
-  <nav class="sticky top-0 z-40 border-b border-white/70 bg-white/85 backdrop-blur-xl shadow-sm">
-    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] font-sans selection:bg-[#0066cc]/20">
+  <nav class="sticky top-0 z-40 border-b border-black/[0.04] bg-white/70 backdrop-blur-2xl">
+    <div class="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
       <div class="flex items-center gap-3">
-        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 via-cyan-500 to-blue-700 shadow-lg shadow-sky-500/20">
-          <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z"></path>
+        <div class="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#1d1d1f] shadow-sm">
+          <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z"></path>
           </svg>
         </div>
         <div>
-          <p class="text-lg font-black tracking-tight text-slate-950">Conversas</p>
-          <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Chat privado entre participantes</p>
+          <p class="text-[19px] font-semibold tracking-tight text-[#1d1d1f]">iFound</p>
+          <p class="text-[11px] font-medium tracking-[0.06em] text-[#86868b]">Mensagens Privadas</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3">
-        <a routerLink="/dashboard" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-950">
-          Feed
+        <a routerLink="/dashboard" class="rounded-full bg-transparent px-4 py-[6px] text-[13px] font-medium text-[#1d1d1f] transition duration-200 hover:bg-black/5">
+          Feed Global
         </a>
-        <a routerLink="/minhas-publicacoes" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-950">
-          As suas publicacoes
+        <a routerLink="/minhas-publicacoes" class="rounded-full bg-transparent px-4 py-[6px] text-[13px] font-medium text-[#1d1d1f] transition duration-200 hover:bg-black/5">
+          Os Seus Anúncios
         </a>
-        <button (click)="logout()" class="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100">
+        <button (click)="logout()" class="rounded-full bg-transparent px-4 py-[6px] text-[13px] font-medium text-[#e30000] transition duration-200 hover:bg-[#fff2f2]">
           Sair
         </button>
       </div>
     </div>
   </nav>
 
-  <main class="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[340px_minmax(0,1fr)] lg:px-8">
-    <aside class="overflow-hidden rounded-[32px] border border-white/80 bg-slate-950 text-white shadow-[0_30px_100px_-45px_rgba(15,23,42,0.8)]">
-      <div class="border-b border-white/10 px-5 py-5">
-        <p class="text-xs font-black uppercase tracking-[0.2em] text-cyan-200">Inbox</p>
-        <h2 class="mt-2 text-2xl font-black tracking-tight">Pessoas com quem falaste</h2>
-        <p class="mt-2 text-sm text-slate-300">As mensagens e fotos so ficam visiveis para ti e para a outra pessoa da conversa.</p>
+  <main class="mx-auto grid max-w-[1200px] gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[340px_minmax(0,1fr)] lg:px-8 h-[calc(100vh-80px)]">
+    
+    <!-- Sidebar -->
+    <aside class="flex flex-col overflow-hidden rounded-[24px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-black/[0.04] h-[calc(100vh-140px)]">
+      <div class="border-b border-[#f5f5f7] px-6 py-6 bg-white/90 backdrop-blur-md">
+        <h2 class="text-[22px] font-semibold tracking-tight text-[#1d1d1f]">Caixa de Entrada</h2>
+        <p class="mt-1 text-[13px] text-[#86868b]">Ligações diretas ocultas.</p>
       </div>
 
-      <div class="max-h-[calc(100vh-12rem)] overflow-y-auto px-3 py-3">
+      <div class="flex-1 overflow-y-auto w-full">
         @if(conversationError) {
-          <div class="mb-3 rounded-3xl border border-rose-400/30 bg-rose-500/10 p-4 text-sm text-rose-200">
+          <div class="m-4 rounded-[12px] bg-[#fff2f2] p-4 text-[13px] text-[#e30000]">
             {{ conversationError }}
           </div>
         }
 
         @if(isConversationLoading) {
-          <div class="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-            A carregar conversas...
-          </div>
+          <div class="p-6 text-[14px] text-[#86868b] text-center font-medium">A sincronizar mensagens...</div>
         }
 
         @if(!isConversationLoading && conversations.length === 0) {
-          <div class="rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-slate-300">
-            Ainda nao tens conversas. Vai ao feed e usa o botao <span class="font-bold text-white">Comunicar</span> num caso.
+          <div class="p-8 text-center text-[#86868b]">
+            <p class="text-[14px]">Nenhuma conversa ativa.</p>
           </div>
         }
 
-        <div class="space-y-2">
+        <div class="flex flex-col">
           @for(conversation of conversations; track conversation._id) {
-            <button (click)="openExistingConversation(conversation._id)" [class.bg-white]="activeConversation?._id === conversation._id" [class.text-slate-900]="activeConversation?._id === conversation._id" class="w-full rounded-3xl border border-white/10 bg-white/5 p-4 text-left text-white transition hover:bg-white/10">
-              <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0">
-                  <p class="truncate text-sm font-black">{{ getConversationPartner(conversation)?.email || 'Conversa' }}</p>
-                  <p class="mt-1 truncate text-xs opacity-70">{{ conversation.publication?.model }} · {{ conversation.publication?.zone }}</p>
-                </div>
-                <span class="text-[10px] font-semibold uppercase tracking-[0.14em] opacity-60">{{ conversation.updatedAt | date:'HH:mm' }}</span>
+            <button (click)="openExistingConversation(conversation._id)" [class.bg-[#f0f8ff]]="activeConversation?._id === conversation._id" class="w-full border-b border-[#f5f5f7] px-6 py-5 text-left transition hover:bg-[#f5f5f7]">
+              <div class="flex items-start justify-between mb-1 gap-2">
+                <p class="truncate text-[15px] font-medium text-[#1d1d1f]">
+                  {{ getConversationPartner(conversation)?.email?.split('@')[0] || 'Utilizador' }}
+                </p>
+                <span class="text-[12px] text-[#86868b] whitespace-nowrap">{{ conversation.updatedAt | date:'HH:mm' }}</span>
               </div>
-              <p class="mt-3 truncate text-sm opacity-80">{{ getLastMessagePreview(conversation) }}</p>
+              <p class="truncate text-[13px] text-[#0066cc] font-medium mb-2">{{ conversation.publication?.model }} <span class="text-[#86868b] font-normal">· {{ conversation.publication?.zone }}</span></p>
+              <p class="truncate text-[14px] text-[#515154] leading-relaxed">{{ getLastMessagePreview(conversation) || 'Sem mensagens' }}</p>
             </button>
           }
         </div>
       </div>
     </aside>
 
-    <section class="flex min-h-[70vh] flex-col overflow-hidden rounded-[32px] border border-white/80 bg-white/90 shadow-[0_30px_100px_-45px_rgba(15,23,42,0.45)] backdrop-blur">
+    <!-- Chat Area -->
+    <section class="flex flex-col overflow-hidden rounded-[24px] border border-black/[0.04] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] h-[calc(100vh-140px)]">
       @if(activeConversation) {
-        <header class="border-b border-slate-100 px-6 py-5 sm:px-8">
+        <header class="border-b border-[#f5f5f7] px-8 py-6 bg-white/90 backdrop-blur-md sticky top-0 z-10 hidden sm:block">
           <div class="flex items-start justify-between gap-4">
             <div>
-              <p class="text-xs font-black uppercase tracking-[0.2em] text-cyan-600">Conversa privada</p>
-              <h3 class="mt-2 text-2xl font-black tracking-tight text-slate-950">{{ activeConversation.publication?.model }}</h3>
-              <p class="mt-2 text-sm text-slate-500">
+              <p class="text-[11px] font-semibold uppercase tracking-wider text-[#0066cc] mb-1">Ligação Encriptada</p>
+              <h3 class="text-[20px] font-semibold tracking-tight text-[#1d1d1f]">{{ activeConversation.publication?.model }}</h3>
+              <p class="mt-1 text-[13px] text-[#86868b]">
                 {{ getConversationPartner(activeConversation)?.email }} · {{ activeConversation.publication?.zone }}
               </p>
             </div>
-            <span class="rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-              So visivel para os participantes
+            <span class="rounded-[8px] bg-[#f5f5f7] px-3 py-1.5 text-[11px] font-medium text-[#86868b]">
+              P2P Seguro
             </span>
           </div>
         </header>
-      } @else {
-        <header class="border-b border-slate-100 px-6 py-5 sm:px-8">
-          <p class="text-xs font-black uppercase tracking-[0.2em] text-cyan-600">Conversa privada</p>
-          <h3 class="mt-2 text-2xl font-black tracking-tight text-slate-950">Seleciona uma conversa</h3>
-          <p class="mt-2 text-sm text-slate-500">Escolhe uma pessoa na coluna da esquerda para abrir o chat.</p>
-        </header>
-      }
 
-      @if(chatError) {
-        <div class="mx-6 mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 sm:mx-8">{{ chatError }}</div>
-      }
+        <!-- Message List -->
+        <div class="flex-1 overflow-y-auto px-6 lg:px-10 py-8 bg-[#f5f5f7]/30">
+          @if(chatError) {
+            <div class="mb-6 rounded-[14px] bg-[#fff2f2] p-4 text-[13px] font-medium text-[#e30000]">{{ chatError }}</div>
+          }
 
-      @if(chatInfo) {
-        <div class="mx-6 mt-5 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm font-semibold text-cyan-700 sm:mx-8">{{ chatInfo }}</div>
-      }
+          @if(chatInfo) {
+            <div class="mb-6 rounded-[14px] bg-[#f0f8ff] p-4 text-[13px] font-medium text-[#0066cc]">{{ chatInfo }}</div>
+          }
 
-      <div class="min-h-0 flex-1 overflow-y-auto px-6 py-6 sm:px-8">
-        @if(isChatLoading) {
-          <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">A carregar conversa...</div>
-        }
+          @if(isChatLoading) {
+            <div class="text-center p-6 text-[14px] text-[#86868b] font-medium">A carregar registo histórico...</div>
+          }
 
-        @if(!isChatLoading && !activeConversation) {
-          <div class="flex h-full min-h-[20rem] items-center justify-center rounded-[28px] border border-dashed border-slate-300 bg-slate-50/70 p-8 text-center">
-            <div>
-              <p class="text-xl font-black tracking-tight text-slate-900">Ainda sem conversa aberta</p>
-              <p class="mt-2 text-sm text-slate-500">Abre uma conversa a partir do feed ou escolhe uma conversa existente.</p>
-            </div>
-          </div>
-        }
-
-        @if(activeConversation) {
-          <div class="space-y-4">
+          <div class="space-y-6">
             @for(message of activeConversation.messages; track message._id) {
-              <div [class.items-end]="message.sender?._id === currentUserId" class="flex flex-col gap-2">
-                <div [class.self-end]="message.sender?._id === currentUserId" [class.bg-cyan-500]="message.sender?._id === currentUserId" [class.text-white]="message.sender?._id === currentUserId" class="max-w-[85%] rounded-[26px] bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700 shadow-lg">
-                  <p class="mb-2 text-[11px] font-bold uppercase tracking-[0.16em]" [ngClass]="message.sender?._id === currentUserId ? 'text-white/70' : 'text-slate-400'">
-                    {{ message.sender?._id === currentUserId ? 'Tu' : message.sender?.email }}
-                  </p>
+              <div [class.items-end]="message.sender?._id === currentUserId" class="flex flex-col gap-1.5">
+                <div [class.bg-[#0066cc]]="message.sender?._id === currentUserId" [class.text-white]="message.sender?._id === currentUserId" [class.rounded-tr-sm]="message.sender?._id === currentUserId" [class.bg-[#e8e8ed]]="message.sender?._id !== currentUserId" [class.text-[#1d1d1f]]="message.sender?._id !== currentUserId" [class.rounded-tl-sm]="message.sender?._id !== currentUserId" class="max-w-[75%] rounded-[20px] px-5 py-3 text-[15px] leading-relaxed shadow-sm">
+                  
                   @if(message.text) {
-                    <p>{{ message.text }}</p>
+                    <p class="whitespace-pre-wrap">{{ message.text }}</p>
                   }
 
                   @if(message.attachments?.length) {
-                    <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div class="grid gap-2 mt-2 max-w-[300px]" [ngClass]="{'grid-cols-2': message.attachments.length > 1}">
                       @for(attachment of message.attachments; track attachment._id) {
-                        <a [href]="getAttachmentUrl(attachment)" target="_blank" rel="noopener" class="overflow-hidden rounded-2xl border border-black/5 bg-white/60 transition hover:opacity-90">
-                          <img [src]="getAttachmentUrl(attachment)" [alt]="attachment.originalName" class="h-40 w-full object-cover">
-                          <div class="px-3 py-2 text-[11px] font-semibold text-slate-600">
-                            Expira em {{ attachment.expiresAt | date:'dd/MM HH:mm' }}
-                          </div>
+                        <a [href]="getAttachmentUrl(attachment)" target="_blank" rel="noopener" class="overflow-hidden rounded-[14px] bg-black/5 block transition hover:opacity-80">
+                          <img [src]="getAttachmentUrl(attachment)" [alt]="attachment.originalName" class="h-32 w-full object-cover">
                         </a>
                       }
                     </div>
                   }
                 </div>
-                <span class="px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{{ message.createdAt | date:'dd/MM HH:mm' }}</span>
+                <!-- timestamp -->
+                <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-[#a1a1a6]">
+                  {{ message.createdAt | date:'HH:mm' }}
+                </span>
               </div>
             }
           </div>
-        }
-      </div>
+        </div>
 
-      @if(activeConversation) {
-        <footer class="border-t border-slate-100 px-6 py-5 sm:px-8">
+        <footer class="border-t border-[#f5f5f7] bg-white px-6 py-5 lg:px-8">
           @if(selectedChatPreviews.length) {
-            <div class="mb-4 flex gap-3 overflow-x-auto pb-1">
+            <div class="mb-4 flex gap-3 overflow-x-auto pb-2">
               @for(preview of selectedChatPreviews; track preview.url; let i = $index) {
-                <div class="relative shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
-                  <img [src]="preview.url" [alt]="preview.name" class="h-24 w-24 object-cover">
-                  <button type="button" (click)="removeSelectedPhoto(i)" class="absolute right-1 top-1 rounded-full bg-slate-950/70 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white">X</button>
+                <div class="relative shrink-0 overflow-hidden rounded-[14px] border border-black/[0.04]">
+                  <img [src]="preview.url" [alt]="preview.name" class="h-16 w-16 object-cover">
+                  <button type="button" (click)="removeSelectedPhoto(i)" class="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white hover:bg-black">
+                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  </button>
                 </div>
               }
             </div>
           }
 
-          <div class="flex flex-col gap-3">
-            <textarea [(ngModel)]="chatMessage" rows="3" placeholder="Escreve uma mensagem..." class="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-100"></textarea>
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <label class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
-                <input type="file" accept="image/*" multiple class="hidden" (change)="onChatFilesSelected($event)">
-                + Fotos (12h)
-              </label>
+          <div class="flex items-end gap-3 rounded-[24px] border border-black/[0.08] bg-[#f5f5f7] p-2 focus-within:ring-[3px] focus-within:ring-[#0066cc]/30 focus-within:bg-white transition-all">
+            <label class="flex-shrink-0 cursor-pointer rounded-full p-2 text-[#86868b] transition hover:bg-[#e8e8ed] hover:text-[#1d1d1f]">
+              <input type="file" accept="image/*" multiple class="hidden" (change)="onChatFilesSelected($event)">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+            </label>
 
-              <button (click)="sendChatMessage()" [disabled]="isSendingMessage" class="rounded-full bg-gradient-to-r from-cyan-500 to-blue-700 px-5 py-3 text-sm font-black text-white shadow-lg shadow-cyan-500/20 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60">
-                {{ isSendingMessage ? 'A enviar...' : 'Enviar mensagem' }}
-              </button>
-            </div>
+            <textarea [(ngModel)]="chatMessage" rows="1" placeholder="iMessage..." class="flex-1 max-h-32 min-h-[40px] resize-none bg-transparent py-2.5 text-[15px] text-[#1d1d1f] outline-none placeholder:text-[#86868b]" (keydown.enter)="!$any($event).shiftKey && sendChatMessage(); $any($event).shiftKey ? true : $event.preventDefault()"></textarea>
+            
+            <button (click)="sendChatMessage()" [disabled]="isSendingMessage || (!chatMessage.trim() && !selectedChatPreviews.length)" class="flex-shrink-0 rounded-full bg-[#0066cc] p-2 text-white transition hover:bg-[#005bb5] disabled:opacity-40 disabled:cursor-not-allowed">
+              <svg class="h-5 w-5 translate-x-[1px] translate-y-[-1px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+            </button>
           </div>
         </footer>
+      } @else {
+        <div class="flex h-full flex-col items-center justify-center p-10 text-center bg-[#f5f5f7]/30">
+          <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#f5f5f7]">
+            <svg class="h-8 w-8 text-[#d2d2d7]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+          </div>
+          <h3 class="text-[20px] font-semibold tracking-tight text-[#1d1d1f]">Caixa de Mensagens</h3>
+          <p class="mt-2 text-[14px] text-[#86868b] max-w-sm">Selecione uma conversa ativa na área lateral para visualizar o historial e enviar mensagens.</p>
+        </div>
       }
     </section>
   </main>

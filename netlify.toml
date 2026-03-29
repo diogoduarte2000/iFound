@@ -1,5 +1,5 @@
 [build]
-  command = "cd backend && npm install && cd ../frontend && npm install && npm run build"
+  command = "API_PROXY_TARGET=\"${BACKEND_API_ORIGIN:-/.netlify/functions/api/api}\" && sed -i \"s|__BACKEND_PROXY_TARGET__|${API_PROXY_TARGET}|g\" netlify.toml && cd backend && npm install && cd ../frontend && npm install && npm run build"
   publish = "frontend/dist/frontend/browser"
   functions = "netlify/functions"
 
@@ -9,7 +9,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/api/api/:splat"
+  to = "__BACKEND_PROXY_TARGET__/:splat"
   status = 200
   force = true
 

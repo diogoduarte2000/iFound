@@ -123,13 +123,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const file = event.target.files[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      this.photoError = 'Formato inválido. Escolha uma imagem.';
+    if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+      this.photoError = 'Formato inválido. Apenas JPG ou PNG.';
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      this.photoError = 'Imagem muito grande. O limite é 5MB.';
+    if (file.size > 2 * 1024 * 1024) {
+      this.photoError = 'Imagem muito grande. O limite é 2MB.';
       return;
     }
 

@@ -35,13 +35,13 @@ const send2FAEmail = async (email, code) => {
       from,
       to: email,
       subject: "Seu codigo de acesso Ifound",
-      text: `O seu codigo de acesso Ifound e: ${code}\n\nEste codigo expira em 10 minutos.`,
+      text: `O seu codigo de acesso Ifound e: ${code}\n\nEste codigo expira em 60 segundos.`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
           <h2 style="margin-bottom: 12px;">Ifound</h2>
           <p>O seu codigo de acesso e:</p>
           <p style="font-size: 28px; font-weight: 700; letter-spacing: 4px; margin: 16px 0;">${code}</p>
-          <p>Este codigo expira em 10 minutos.</p>
+          <p>Este codigo expira em 60 segundos.</p>
         </div>
       `,
     });
@@ -131,7 +131,7 @@ router.post("/register", async (req, res) => {
 
     const code = generate2FACode();
     newUser.twoFactorSecret = code;
-    newUser.twoFactorExpires = new Date(Date.now() + 10 * 60000);
+    newUser.twoFactorExpires = new Date(Date.now() + 60 * 1000); // 60 segundos
     await newUser.save();
 
     const delivery = await send2FAEmail(newUser.email, code);
@@ -172,7 +172,7 @@ router.post("/login", async (req, res) => {
 
     const code = generate2FACode();
     user.twoFactorSecret = code;
-    user.twoFactorExpires = new Date(Date.now() + 10 * 60000);
+    user.twoFactorExpires = new Date(Date.now() + 60 * 1000); // 60 segundos
     await user.save();
 
     const delivery = await send2FAEmail(user.email, code);
@@ -218,6 +218,41 @@ router.post("/verify-2fa", async (req, res) => {
     res.json({ token, message: "Login efetuado com sucesso!" });
   } catch (error) {
     res.status(500).json({ message: "Erro na verificacao do codigo." });
+  }
+});
+
+router.post("/resend-2fa", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Utilizador nao encontrado." });
+    }
+
+    // Verificar se há um código ativo e se expirou
+    if (!user.twoFactorSecret || user.twoFactorExpires >= new Date()) {
+      return res.status(400).json({ message: "Ja existe um codigo ativo. Aguarde a expiracao ou tente novamente." });
+    }
+
+    // Gerar novo código
+    const code = generate2FACode();
+    user.twoFactorSecret = code;
+    user.twoFactorExpires = new Date(Date.now() + 60 * 1000); // 60 segundos
+    await user.save();
+
+    const delivery = await send2FAEmail(user.email, code);
+
+    res.json({
+      message:
+        delivery.deliveryMode === "email"
+          ? "Novo codigo enviado para o seu email."
+          : "SMTP nao configurado. Novo codigo disponibilizado localmente.",
+      ...delivery,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao reenviar o codigo." });
   }
 });
 

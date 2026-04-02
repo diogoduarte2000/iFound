@@ -103,4 +103,26 @@ export class LoginComponent implements OnInit {
       }
     });
   }
+
+  onResendCode() {
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.infoMessage = '';
+
+    this.http.post(resolveApiUrl('/auth/resend-2fa'), { email: this.loginForm.value.email }).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        this.infoMessage = res.message || 'Novo código enviado.';
+
+        if (res.devCode) {
+          this.twoFaForm.patchValue({ code: res.devCode });
+          this.infoMessage = `SMTP não configurado. Novo código local: ${res.devCode}`;
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.error.message || 'Erro ao reenviar código.';
+      }
+    });
+  }
 }

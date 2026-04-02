@@ -3,7 +3,11 @@ const isLocalhost =
   isBrowser &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-const backendOrigin = isLocalhost ? 'http://localhost:5000' : '';
+// Quando o backend estiver no Render, coloca o link gerado aqui
+// Exemplo: 'https://ifound-backend-xyz.onrender.com'
+const PRODUCTION_APIURL = ''; 
+
+const backendOrigin = isLocalhost ? 'http://localhost:5000' : PRODUCTION_APIURL;
 
 export const API_BASE_URL = `${backendOrigin}/api`;
 

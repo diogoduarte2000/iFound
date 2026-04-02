@@ -44,16 +44,17 @@ const smtpConfigured = Boolean(
   process.env.SMTP_PASS
 );
 
-mongoose.connect(MONGODB_URI)
-  .then(() => {
-    console.log("MongoDB ligado com sucesso.");
-    if (!smtpConfigured) {
-      console.warn("SMTP nao configurado. O 2FA por email nao vai funcionar.");
-    }
-    app.listen(PORT, () => {
-      console.log(`Servidor a correr na porta ${PORT}.`);
+app.listen(PORT, () => {
+  console.log(`Servidor a correr na porta ${PORT}.`);
+  
+  mongoose.connect(MONGODB_URI)
+    .then(() => {
+      console.log("MongoDB ligado com sucesso.");
+      if (!smtpConfigured) {
+        console.warn("SMTP nao configurado. O 2FA por email nao vai funcionar.");
+      }
+    })
+    .catch((err) => {
+      console.error("Erro critico ao ligar ao MongoDB:", err.message);
     });
-  })
-  .catch((err) => {
-    console.error("Erro ao ligar ao MongoDB:", err);
-  });
+});

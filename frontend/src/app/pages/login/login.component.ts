@@ -16,12 +16,15 @@ import { resolveApiUrl } from '../../services/api.config';
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   twoFaForm: FormGroup;
-  step = 1; // 1: Credentials, 2: 2FA
+  step = 1; // 1: Credentials, 2: 2FA TOTP or Login
   isLoading = false;
   errorMessage = '';
   infoMessage = '';
   isInitialLoading = true;
   isDbOffline = false;
+  twoFactorRequired = false;
+  trustDeviceForm: FormGroup;
+  deviceId = '';
 
   constructor(
     private fb: FormBuilder,
@@ -35,8 +38,15 @@ export class LoginComponent implements OnInit {
     });
 
     this.twoFaForm = this.fb.group({
-      code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]]
+      code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(8)]]
     });
+
+    this.trustDeviceForm = this.fb.group({
+      trustDevice: [false]
+    });
+
+    // Generate device ID
+    this.deviceId = this.generateDeviceId();
   }
 
   ngOnInit() {
@@ -49,6 +59,15 @@ export class LoginComponent implements OnInit {
         this.isDbOffline = true;
       }
     });
+  }
+
+  generateDeviceId(): string {
+    let deviceId = localStorage.getItem('deviceId');
+    if (!deviceId) {
+      deviceId = 'device_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+      localStorage.setItem('deviceId', deviceId);
+    }
+    return deviceId;
   }
 
   retryConnection() {
@@ -66,12 +85,16 @@ export class LoginComponent implements OnInit {
     this.authService.login(this.loginForm.value).subscribe({
       next: (res) => {
         this.isLoading = false;
-        this.step = 2; // Advance to 2FA
-        this.infoMessage = res.message || '';
-
-        if (res.devCode) {
-          this.twoFaForm.patchValue({ code: res.devCode });
-          this.infoMessage = `SMTP nao configurado. Codigo local: ${res.devCode}`;
+        
+        // If 2FA not enabled, login directly
+        if (!res.twoFactorEnabled) {
+          this.authService.saveToken(res.token);
+          this.router.navigate(['/dashboard']);
+        } else {
+          // If 2FA enabled, show TOTP verification
+          this.twoFactorRequired = true;
+          this.step = 2;
+          this.infoMessage = res.message || 'Insere o codigo do teu Authenticator.';
         }
       },
       error: (err) => {
@@ -81,7 +104,7 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  onVerify() {
+  onVerifyTOTP() {
     if (this.twoFaForm.invalid) return;
     this.isLoading = true;
     this.errorMessage = '';
@@ -89,17 +112,20 @@ export class LoginComponent implements OnInit {
 
     const data = {
       email: this.loginForm.value.email,
-      code: this.twoFaForm.value.code
+      code: this.twoFaForm.value.code,
+      deviceId: this.deviceId,
+      trustDevice: this.trustDeviceForm.value.trustDevice
     };
 
-    this.authService.verify2fa(data).subscribe({
-      next: (res) => {
+    this.http.post(resolveApiUrl('/auth/verify-2fa'), data).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
         this.authService.saveToken(res.token);
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error.message || 'Falha ao verificar o código.';
+        this.errorMessage = err.error.message || 'Codigo invalido ou backup code expirado.';
       }
     });
   }

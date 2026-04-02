@@ -6,10 +6,19 @@ const userSchema = new mongoose.Schema(
     passwordHash: { type: String, required: true },
     nif: { type: String, required: true, unique: true }, // Tax ID for Portugal
     
-    // 2FA Fields
-    twoFactorSecret: { type: String }, 
-    twoFactorExpires: { type: Date },
-    isVerified: { type: Boolean, default: false },
+    // 2FA Fields (TOTP-based with Google Authenticator)
+    twoFactorEnabled: { type: Boolean, default: false },
+    twoFactorSecret: { type: String }, // BASE32 secret for TOTP
+    twoFactorBackupCodes: [{ type: String }], // One-time backup codes
+    twoFactorSetupPending: { type: Boolean, default: false }, // Flag for incomplete setup
+    
+    // Trusted Devices (skip 2FA on trusted devices)
+    trustedDevices: [{
+      deviceId: { type: String },
+      deviceName: { type: String },
+      createdAt: { type: Date, default: Date.now },
+      lastUsed: { type: Date, default: Date.now }
+    }],
 
     // Password Reset
     resetPasswordSecret: { type: String },

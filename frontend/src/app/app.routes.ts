@@ -5,12 +5,14 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ChatsComponent } from './pages/chats/chats.component';
 import { MyPublicationsComponent } from './pages/my-publications/my-publications.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { TwoFASetupComponent } from './pages/two-fa-setup/two-fa-setup.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: '2fa/setup', component: TwoFASetupComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'conversas', component: ChatsComponent },
   { path: 'minhas-publicacoes', component: MyPublicationsComponent }

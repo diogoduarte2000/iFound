@@ -96,6 +96,16 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "E obrigatorio aceitar a Politica de Privacidade." });
     }
 
+    const blockedDomains = [
+      "javaemail.com", "sharebot.net", "flownue.com",
+      "yopmail.com", "mailinator.com", "guerrillamail.com", "tempmail.com"
+    ];
+    const emailDomain = email.split('@')[1].toLowerCase();
+    
+    if (blockedDomains.includes(emailDomain)) {
+      return res.status(400).json({ message: "Fornecedores de email temporário não são autorizados na plataforma." });
+    }
+
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
       return res.status(400).json({ message: "Este email ja esta registado." });

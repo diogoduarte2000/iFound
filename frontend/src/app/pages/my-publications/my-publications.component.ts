@@ -75,11 +75,20 @@ export class MyPublicationsComponent implements OnInit, OnDestroy {
 
     this.publicationService.updatePublicationStatus(publication._id, status).subscribe({
       next: (response: any) => {
-        const updatedPublication = response.publication;
-        this.publications = this.publications.map((item) =>
-          item._id === updatedPublication._id ? updatedPublication : item
-        );
+        const updatedDoc = response.publication;
+        const index = this.publications.findIndex(p => p._id === updatedDoc._id);
+        if (index > -1) {
+          this.publications[index] = updatedDoc;
+          this.publications = [...this.publications];
+        }
         this.updatingPublicationId = '';
+        this.message = `Mudança aplicada e guardada! Novo estado: ${updatedDoc.status}.`;
+        
+        setTimeout(() => {
+          if (this.message.startsWith('Mudança aplicada')) {
+            this.message = '';
+          }
+        }, 5000);
       },
       error: (err: HttpErrorResponse) => {
         this.updatingPublicationId = '';

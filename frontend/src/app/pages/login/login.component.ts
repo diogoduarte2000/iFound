@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
+import { resolveApiUrl } from '../../services/api.config';
 
 @Component({
   selector: 'app-login',
@@ -11,18 +13,21 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   twoFaForm: FormGroup;
   step = 1; // 1: Credentials, 2: 2FA
   isLoading = false;
   errorMessage = '';
   infoMessage = '';
+  isInitialLoading = true;
+  isDbOffline = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -32,6 +37,24 @@ export class LoginComponent {
     this.twoFaForm = this.fb.group({
       code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]]
     });
+  }
+
+  ngOnInit() {
+    this.http.get(resolveApiUrl('/status')).subscribe({
+      next: () => {
+        this.isInitialLoading = false;
+      },
+      error: () => {
+        this.isInitialLoading = false;
+        this.isDbOffline = true;
+      }
+    });
+  }
+
+  retryConnection() {
+    this.isInitialLoading = true;
+    this.isDbOffline = false;
+    this.ngOnInit();
   }
 
   onLogin() {

@@ -17,7 +17,11 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/status", (req, res) => {
-  res.json({ message: "Backend do Ifound a funcionar!" });
+  if (mongoose.connection.readyState === 1) {
+    res.json({ message: "Backend e DB conectados com sucesso!" });
+  } else {
+    res.status(503).json({ message: "Servidor ativo mas Banco de Dados offline/indisponível." });
+  }
 });
 
 const authRoutes = require("./routes/auth");

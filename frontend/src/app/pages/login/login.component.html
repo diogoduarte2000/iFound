@@ -25,8 +25,38 @@
       </div>
     }
 
-    <!-- Step 1: Credentials -->
-    @if(step === 1) {
+    <!-- Initial Loading State -->
+    @if(isInitialLoading) {
+      <div class="flex flex-col items-center justify-center py-10 transition-opacity">
+        <svg class="h-10 w-10 text-[#86868b] animate-[spin_0.8s_linear_infinite]" viewBox="0 0 24 24">
+          <style>
+            .ios-spin line { stroke-linecap: round; stroke-width: 2.5; stroke: currentColor; }
+          </style>
+          <g class="ios-spin" transform="translate(12,12)">
+            <line x1="0" y1="-9" x2="0" y2="-5" opacity="1" />
+            <line x1="6.36" y1="-6.36" x2="3.53" y2="-3.53" opacity="0.8" />
+            <line x1="9" y1="0" x2="5" y2="0" opacity="0.6" />
+            <line x1="6.36" y1="6.36" x2="3.53" y2="3.53" opacity="0.4" />
+            <line x1="0" y1="9" x2="0" y2="5" opacity="0.2" />
+            <line x1="-6.36" y1="6.36" x2="-3.53" y2="3.53" opacity="0.1" />
+            <line x1="-9" y1="0" x2="-5" y2="0" opacity="0.1" />
+            <line x1="-6.36" y1="-6.36" x2="-3.53" y2="-3.53" opacity="0.2" />
+          </g>
+        </svg>
+        <p class="mt-4 text-[15px] font-medium text-[#86868b]">A ligar aos servidores iFound...</p>
+      </div>
+    } @else if (isDbOffline) {
+      <div class="text-center py-8 transition-opacity">
+        <div class="w-16 h-16 bg-[#fff2f2] rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+          <svg class="w-8 h-8 text-[#e30000]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        </div>
+        <h2 class="text-[24px] font-semibold tracking-tight text-[#1d1d1f] mb-2 leading-tight">Serviço Indisponível (404)</h2>
+        <p class="text-[#86868b] text-[15px] mb-6">Não foi possível estabelecer ligação segura com a base de dados principal. Por favor, tente novamente mais tarde.</p>
+        <button (click)="retryConnection()" class="bg-[#1d1d1f] hover:bg-black text-white font-medium py-[10px] px-6 rounded-full transition-all text-[15px]">Tentar Novamente</button>
+      </div>
+    } @else {
+      <!-- Step 1: Credentials -->
+      @if(step === 1) {
       <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="space-y-4">
         <div>
           <input type="email" formControlName="email" class="w-full bg-[#f5f5f7] border border-transparent rounded-[14px] px-4 py-[14px] text-[#1d1d1f] text-[17px] placeholder-[#86868b] focus:outline-none focus:ring-[3px] focus:ring-[#0066cc]/40 focus:bg-white focus:border-[#0066cc] transition-all" placeholder="ID Apple ou Email">
@@ -35,8 +65,27 @@
           <input type="password" formControlName="password" class="w-full bg-[#f5f5f7] border border-transparent rounded-[14px] px-4 py-[14px] text-[#1d1d1f] text-[17px] placeholder-[#86868b] focus:outline-none focus:ring-[3px] focus:ring-[#0066cc]/40 focus:bg-white focus:border-[#0066cc] transition-all" placeholder="Palavra-passe">
         </div>
         <div class="pt-4">
-          <button type="submit" [disabled]="loginForm.invalid || isLoading" class="w-full bg-[#0066cc] hover:bg-[#005bb5] text-white font-medium py-[14px] px-4 rounded-[14px] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-[17px]">
-            {{ isLoading ? 'A processar...' : 'Continuar com Email' }}
+          <button type="submit" [disabled]="loginForm.invalid || isLoading" class="w-full bg-[#0066cc] hover:bg-[#005bb5] text-white font-medium py-[14px] px-4 rounded-[14px] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-[17px] flex justify-center items-center">
+            @if(isLoading) {
+              <svg class="h-5 w-5 mr-2 text-white/80 animate-[spin_0.8s_linear_infinite]" viewBox="0 0 24 24">
+                <style>
+                  .ios-spin line { stroke-linecap: round; stroke-width: 2.5; stroke: currentColor; }
+                </style>
+                <g class="ios-spin" transform="translate(12,12)">
+                  <line x1="0" y1="-9" x2="0" y2="-5" opacity="1" />
+                  <line x1="6.36" y1="-6.36" x2="3.53" y2="-3.53" opacity="0.8" />
+                  <line x1="9" y1="0" x2="5" y2="0" opacity="0.6" />
+                  <line x1="6.36" y1="6.36" x2="3.53" y2="3.53" opacity="0.4" />
+                  <line x1="0" y1="9" x2="0" y2="5" opacity="0.2" />
+                  <line x1="-6.36" y1="6.36" x2="-3.53" y2="3.53" opacity="0.1" />
+                  <line x1="-9" y1="0" x2="-5" y2="0" opacity="0.1" />
+                  <line x1="-6.36" y1="-6.36" x2="-3.53" y2="-3.53" opacity="0.2" />
+                </g>
+              </svg>
+              A processar...
+            } @else {
+              Continuar com Email
+            }
           </button>
         </div>
       </form>
@@ -53,13 +102,33 @@
           <input type="text" formControlName="code" class="w-full bg-[#f5f5f7] border border-transparent rounded-[14px] px-4 py-[14px] text-[#1d1d1f] text-center text-3xl tracking-[0.25em] placeholder-[#d2d2d7] focus:outline-none focus:ring-[3px] focus:ring-[#0066cc]/40 focus:bg-white focus:border-[#0066cc] transition-all font-mono" placeholder="000000" maxlength="6">
         </div>
         <div class="pt-2">
-          <button type="submit" [disabled]="twoFaForm.invalid || isLoading" class="w-full bg-[#0066cc] hover:bg-[#005bb5] text-white font-medium py-[14px] px-4 rounded-[14px] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-[17px]">
-            {{ isLoading ? 'A verificar...' : 'Validar Sessão' }}
+          <button type="submit" [disabled]="twoFaForm.invalid || isLoading" class="w-full bg-[#0066cc] hover:bg-[#005bb5] text-white font-medium py-[14px] px-4 rounded-[14px] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-[17px] flex justify-center items-center">
+            @if(isLoading) {
+              <svg class="h-5 w-5 mr-2 text-white/80 animate-[spin_0.8s_linear_infinite]" viewBox="0 0 24 24">
+                <style>
+                  .ios-spin line { stroke-linecap: round; stroke-width: 2.5; stroke: currentColor; }
+                </style>
+                <g class="ios-spin" transform="translate(12,12)">
+                  <line x1="0" y1="-9" x2="0" y2="-5" opacity="1" />
+                  <line x1="6.36" y1="-6.36" x2="3.53" y2="-3.53" opacity="0.8" />
+                  <line x1="9" y1="0" x2="5" y2="0" opacity="0.6" />
+                  <line x1="6.36" y1="6.36" x2="3.53" y2="3.53" opacity="0.4" />
+                  <line x1="0" y1="9" x2="0" y2="5" opacity="0.2" />
+                  <line x1="-6.36" y1="6.36" x2="-3.53" y2="3.53" opacity="0.1" />
+                  <line x1="-9" y1="0" x2="-5" y2="0" opacity="0.1" />
+                  <line x1="-6.36" y1="-6.36" x2="-3.53" y2="-3.53" opacity="0.2" />
+                </g>
+              </svg>
+              A verificar...
+            } @else {
+              Validar Sessão
+            }
           </button>
         </div>
         <button type="button" (click)="step = 1" class="w-full bg-transparent text-[#0066cc] hover:underline font-medium text-[15px] py-1 transition-colors">Voltar atrás</button>
       </form>
     }
+  }
 
     <!-- Footer -->
     <div class="mt-8 text-center pt-6 border-t border-[#f5f5f7] flex flex-col gap-3">

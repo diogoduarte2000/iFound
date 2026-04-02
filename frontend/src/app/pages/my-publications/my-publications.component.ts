@@ -74,18 +74,16 @@ export class MyPublicationsComponent implements OnInit, OnDestroy {
     this.message = '';
 
     this.publicationService.updatePublicationStatus(publication._id, status).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         const updatedPublication = response.publication;
         this.publications = this.publications.map((item) =>
           item._id === updatedPublication._id ? updatedPublication : item
         );
         this.updatingPublicationId = '';
-        this.loadPublications(true);
       },
       error: (err: HttpErrorResponse) => {
         this.updatingPublicationId = '';
         this.message = err.error?.message || 'Nao foi possivel atualizar o estado da publicacao.';
-        this.loadPublications();
       }
     });
   }

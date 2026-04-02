@@ -59,10 +59,9 @@ const send2FAEmail = async (email, code) => {
     return { deliveryMode: "email" };
   } catch (error) {
     if (error.message === "SMTP_NOT_CONFIGURED") {
-      console.warn("SMTP nao configurado. A devolver codigo 2FA em modo local.");
-      return { deliveryMode: "dev", devCode: code };
+      console.error("Erro: SMTP nao configurado. Configura variáveis de ambiente SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS no Render.");
+      throw new Error("Email service not configured");
     }
-
     throw error;
   }
 };
@@ -90,10 +89,9 @@ const sendPasswordResetEmail = async (email, code) => {
     return { deliveryMode: "email" };
   } catch (error) {
     if (error.message === "SMTP_NOT_CONFIGURED") {
-      console.warn("SMTP nao configurado. A devolver codigo reset em modo local.");
-      return { deliveryMode: "dev", devCode: code };
+      console.error("Erro: SMTP nao configurado. Configura variáveis de ambiente SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS no Render.");
+      throw new Error("Email service not configured");
     }
-
     throw error;
   }
 };

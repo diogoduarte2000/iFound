@@ -16,6 +16,9 @@ const publicationSchema = new mongoose.Schema(
     exactLocation: { type: String },
     dateOfEvent: { type: Date, required: true },
     
+    // Photo (Base64 String)
+    photo: { type: String, required: true },
+    
     // Ownership
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     status: { type: String, enum: ["Ativo", "Pendente", "Resolvido", "Offline"], default: "Ativo" },

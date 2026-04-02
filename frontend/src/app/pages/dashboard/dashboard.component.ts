@@ -32,6 +32,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isConversationLoading = false;
   message = '';
   conversationError = '';
+  photoPreview: string | null = null;
+  photoError: string = '';
 
   readonly locationOptions = PORTUGAL_LOCATIONS;
   readonly modelosIphone = [
@@ -67,7 +69,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       distinctiveMarks: [''],
       zone: ['', Validators.required],
       exactLocation: [''],
-      dateOfEvent: ['', Validators.required]
+      dateOfEvent: ['', Validators.required],
+      photo: [null, Validators.required]
     });
   }
 
@@ -113,6 +116,56 @@ export class DashboardComponent implements OnInit, OnDestroy {
   setStatus(status: 'Todos' | 'Ativo' | 'Pendente') {
     this.filterStatus = status;
     this.loadPublications();
+  }
+
+  onFileSelected(event: any) {
+    this.photoError = '';
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.photoError = 'Formato inválido. Escolha uma imagem.';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.photoError = 'Imagem muito grande. O limite é 5MB.';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        ctx?.drawImage(img, 0, 0, width, height);
+        const resizedB64 = canvas.toDataURL('image/jpeg', 0.8);
+        this.photoPreview = resizedB64;
+        this.pubForm.patchValue({ photo: resizedB64 });
+        this.pubForm.get('photo')?.markAsTouched();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
   onZoneChange(zone: string) {
@@ -190,7 +243,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: () => {
         this.isLoading = false;
         this.viewMode = 'list';
-        this.pubForm.reset({ type: 'Perdido' });
+        this.pubForm.reset({ type: 'Perdido', photo: null });
+        this.photoPreview = null;
         this.hasAttemptedSubmit = false;
         this.loadPublications();
       },
@@ -273,7 +327,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       model: 'modelo',
       color: 'cor',
       zone: 'localidade',
-      dateOfEvent: 'data da ocorrencia'
+      dateOfEvent: 'data da ocorrencia',
+      photo: 'fotografia'
     };
 
     return Object.entries(labels)

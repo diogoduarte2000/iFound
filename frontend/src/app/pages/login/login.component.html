@@ -91,12 +91,13 @@
       </form>
     }
 
-    <!-- Step 2: TOTP Verification (if 2FA enabled) -->
-    @if(step === 2 && twoFactorRequired) {
+    <!-- Step 2: 2FA Email Code Verification -->
+    @if(step === 2) {
       <form [formGroup]="twoFaForm" (ngSubmit)="onVerifyTOTP()" class="space-y-6">
         <div class="text-center mb-6">
-          <p class="text-[#86868b] text-[15px]">Insere o codigo do teu Authenticator:</p>
-          <p class="text-[13px] text-[#86868b] mt-2">O codigo muda a cada 30 segundos</p>
+          <p class="text-[#86868b] text-[15px]">Enviamos um codigo para:</p>
+          <p class="font-medium text-[#1d1d1f] mt-1">{{ loginForm.value.email }}</p>
+          <p class="text-[13px] text-[#86868b] mt-2">O codigo expira em 60 segundos</p>
         </div>
         <div>
           <input type="text" formControlName="code" class="w-full bg-[#f5f5f7] border border-transparent rounded-[14px] px-4 py-[14px] text-[#1d1d1f] text-center text-3xl tracking-[0.25em] placeholder-[#d2d2d7] focus:outline-none focus:ring-[3px] focus:ring-[#0066cc]/40 focus:bg-white focus:border-[#0066cc] transition-all font-mono" placeholder="000000" maxlength="8">
@@ -130,6 +131,7 @@
           </button>
         </div>
         <button type="button" (click)="step = 1" class="w-full bg-transparent text-[#0066cc] hover:underline font-medium text-[15px] py-1 transition-colors">Voltar atrás</button>
+        <button type="button" (click)="onResendCode()" [disabled]="isLoading" class="w-full bg-transparent text-[#86868b] hover:text-[#0066cc] hover:underline font-medium text-[15px] py-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Reenviar codigo</button>
       </form>
     }
   }

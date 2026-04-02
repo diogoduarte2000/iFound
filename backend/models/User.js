@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema(
     twoFactorBackupCodes: [{ type: String }], // One-time backup codes
     twoFactorSetupPending: { type: Boolean, default: false }, // Flag for incomplete setup
     
+    // Temporary 2FA Code (sent via email, expires in 60 seconds)
+    twoFactorCode: { type: String },
+    twoFactorCodeExpires: { type: Date },
+    
     // Trusted Devices (skip 2FA on trusted devices)
     trustedDevices: [{
       deviceId: { type: String },

@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const crypto = require("crypto");
 const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleware");
@@ -16,36 +16,22 @@ const {
 
 const router = express.Router();
 
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
+const FROM_EMAIL = "noreply@ifound.pt"; // Default sender email
+
 const generate2FACode = () => Math.floor(100000 + Math.random() * 900000).toString();
-
-const getMailTransporter = () => {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
-
-  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-    throw new Error("SMTP_NOT_CONFIGURED");
-  }
-
-  return nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT),
-    secure: String(process.env.SMTP_SECURE).toLowerCase() === "true",
-    auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS,
-    },
-  });
-};
 
 const send2FAEmail = async (email, code) => {
   try {
-    const transporter = getMailTransporter();
-    const from = process.env.MAIL_FROM || process.env.SMTP_USER;
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY_NOT_CONFIGURED");
+    }
 
-    await transporter.sendMail({
-      from,
+    await resend.emails.send({
+      from: FROM_EMAIL,
       to: email,
       subject: "Seu codigo de acesso Ifound",
-      text: `O seu codigo de acesso Ifound e: ${code}\n\nEste codigo expira em 60 segundos.`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
           <h2 style="margin-bottom: 12px;">Ifound</h2>
@@ -58,40 +44,42 @@ const send2FAEmail = async (email, code) => {
 
     return { deliveryMode: "email" };
   } catch (error) {
-    if (error.message === "SMTP_NOT_CONFIGURED") {
-      console.error("Erro: SMTP nao configurado. Configura variáveis de ambiente SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS no Render.");
+    if (error.message === "RESEND_API_KEY_NOT_CONFIGURED") {
+      console.error("Erro: RESEND_API_KEY nao configurado. Adiciona a variavel de ambiente RESEND_API_KEY no Render.");
       throw new Error("Email service not configured");
     }
+    console.error("Erro ao enviar email com Resend:", error);
     throw error;
   }
 };
 
 const sendPasswordResetEmail = async (email, code) => {
   try {
-    const transporter = getMailTransporter();
-    const from = process.env.MAIL_FROM || process.env.SMTP_USER;
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY_NOT_CONFIGURED");
+    }
 
-    await transporter.sendMail({
-      from,
+    await resend.emails.send({
+      from: FROM_EMAIL,
       to: email,
       subject: "Recuperacao de Palavra-passe Ifound",
-      text: `O seu codigo de recuperacao e: ${code}\n\nEste codigo expira em 15 minutos.`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
           <h2 style="margin-bottom: 12px;">Ifound</h2>
           <p>O seu codigo de recuperacao e:</p>
           <p style="font-size: 28px; font-weight: 700; letter-spacing: 4px; margin: 16px 0;">${code}</p>
-          <p>Este codigo expira em 15 minutos. Se não pediu, pode ignorar este email.</p>
+          <p>Este codigo expira em 15 minutos. Se nao pediu, pode ignorar este email.</p>
         </div>
       `,
     });
 
     return { deliveryMode: "email" };
   } catch (error) {
-    if (error.message === "SMTP_NOT_CONFIGURED") {
-      console.error("Erro: SMTP nao configurado. Configura variáveis de ambiente SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS no Render.");
+    if (error.message === "RESEND_API_KEY_NOT_CONFIGURED") {
+      console.error("Erro: RESEND_API_KEY nao configurado. Adiciona a variavel de ambiente RESEND_API_KEY no Render.");
       throw new Error("Email service not configured");
     }
+    console.error("Erro ao enviar email com Resend:", error);
     throw error;
   }
 };
@@ -169,26 +157,26 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Credenciais invalidas." });
     }
 
-    // If 2FA is not enabled, allow direct login (or suggest enabling it)
-    if (!user.twoFactorEnabled) {
-      const token = jwt.sign(
-        { id: user._id, email: user.email },
-        process.env.JWT_SECRET || "default_secret_key",
-        { expiresIn: "1d" }
-      );
-      return res.json({
-        token,
-        message: "Login efetuado com sucesso!",
-        twoFactorEnabled: false,
-      });
+    // Generate 6-digit code and save to DB (expires in 60 seconds)
+    const code = generate2FACode();
+    user.twoFactorCode = code;
+    user.twoFactorCodeExpires = new Date(Date.now() + 60 * 1000); // 60 seconds
+    await user.save();
+
+    // Send email with code
+    try {
+      await send2FAEmail(user.email, code);
+    } catch (emailError) {
+      console.error("Email envio falhou:", emailError);
+      return res.status(500).json({ message: "Erro ao enviar codigo por email. Tenta novamente." });
     }
 
-    // If 2FA is enabled, return flag requiring TOTP verification
+    // Return flag requiring 2FA verification
     res.json({
-      message: "Credenciais validas. Insere o codigo do Authenticator.",
+      message: "Credenciais validas. Enviamos um codigo para o teu email.",
       email: user.email,
-      twoFactorEnabled: true,
-      requiresTOTP: true,
+      requiresEmailCode: true,
+      twoFactorEnabled: user.twoFactorEnabled, // Flag indicating if TOTP is also available
     });
   } catch (error) {
     console.error(error);
@@ -317,6 +305,44 @@ router.post("/reset-password", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erro ao atualizar a palavra-passe." });
+  }
+});
+
+// POST /resend-2fa - Resend 2FA email code (60s expiration)
+router.post("/resend-2fa", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Utilizador nao encontrado." });
+    }
+
+    // Check if a valid code already exists
+    if (user.twoFactorCode && user.twoFactorCodeExpires > new Date()) {
+      return res.status(400).json({ message: "Ja existe um codigo ativo. Aguarda a expiracao (60 segundos)." });
+    }
+
+    // Generate new code
+    const code = generate2FACode();
+    user.twoFactorCode = code;
+    user.twoFactorCodeExpires = new Date(Date.now() + 60 * 1000); // 60 seconds
+    await user.save();
+
+    // Send email
+    try {
+      await send2FAEmail(user.email, code);
+    } catch (emailError) {
+      console.error("Email envio falhou:", emailError);
+      return res.status(500).json({ message: "Erro ao enviar codigo por email." });
+    }
+
+    res.json({
+      message: "Novo codigo enviado para o teu email."
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao reenviar codigo." });
   }
 });
 
@@ -460,7 +486,7 @@ router.get("/2fa/backup-codes/regenerate", authMiddleware, async (req, res) => {
   }
 });
 
-// POST /verify-2fa - Updated to support TOTP + Backup codes + Trusted devices
+// POST /verify-2fa - Verify email code, TOTP, or backup codes
 router.post("/verify-2fa", async (req, res) => {
   try {
     const { email, code, deviceId, trustDevice } = req.body;
@@ -470,17 +496,11 @@ router.post("/verify-2fa", async (req, res) => {
       return res.status(400).json({ message: "Utilizador nao encontrado." });
     }
 
-    // If 2FA not enabled, skip verification
-    if (!user.twoFactorEnabled) {
-      const token = jwt.sign(
-        { id: user._id, email: user.email },
-        process.env.JWT_SECRET || "default_secret_key",
-        { expiresIn: "1d" }
-      );
-      return res.json({ token, message: "Login efetuado com sucesso!" });
+    if (!code || code.length < 6) {
+      return res.status(400).json({ message: "Codigo invalido." });
     }
 
-    // Check if device is trusted
+    // Check if device is trusted (skip 2FA for trusted devices)
     if (deviceId) {
       const trustedDevice = user.trustedDevices.find((d) => d.deviceId === deviceId);
       if (trustedDevice) {
@@ -496,20 +516,25 @@ router.post("/verify-2fa", async (req, res) => {
       }
     }
 
-    // Verify TOTP code or backup code
-    if (!code || code.length < 6) {
-      return res.status(400).json({ message: "Codigo invalido." });
-    }
-
     let isValidCode = false;
 
-    // Try TOTP verification first
-    if (code.length === 6) {
+    // Priority 1: Verify email code (6 digits, expires in 60 seconds)
+    if (code.length === 6 && user.twoFactorCode) {
+      if (user.twoFactorCode === code && user.twoFactorCodeExpires > new Date()) {
+        isValidCode = true;
+        // Clear the code after successful verification
+        user.twoFactorCode = null;
+        user.twoFactorCodeExpires = null;
+      }
+    }
+
+    // Priority 2: Verify TOTP code (if 2FA enabled and email code didn't work)
+    if (!isValidCode && code.length === 6 && user.twoFactorEnabled && user.twoFactorSecret) {
       isValidCode = verifyTOTPCode(user.twoFactorSecret, code);
     }
 
-    // Try backup code if TOTP fails
-    if (!isValidCode && code.length === 8) {
+    // Priority 3: Verify backup code (if 2FA enabled)
+    if (!isValidCode && code.length === 8 && user.twoFactorEnabled) {
       const hashedCode = hashBackupCode(code);
       const backupCodeIndex = user.twoFactorBackupCodes.indexOf(hashedCode);
 

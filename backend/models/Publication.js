@@ -17,7 +17,7 @@ const publicationSchema = new mongoose.Schema(
     dateOfEvent: { type: Date, required: true },
     
     // Photo (Base64 String)
-    photo: { type: String, required: true },
+    photo: { type: String, required: false, default: '' },
     
     // Ownership
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },

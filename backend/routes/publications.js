@@ -57,6 +57,10 @@ router.post("/", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Tipo invalido." });
     }
 
+    if (!photo) {
+      return res.status(400).json({ message: "É obrigatório anexar uma fotografia." });
+    }
+
     await expirePublications(req.user.id);
 
     const onlineCount = await Publication.countDocuments({

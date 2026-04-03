@@ -202,10 +202,7 @@ router.post("/forgot-password", async (req, res) => {
     const delivery = await sendPasswordResetEmail(user.email, code);
 
     res.json({
-      message: delivery.deliveryMode === "email" 
-        ? "Codigo de recuperacao enviado para o seu email."
-        : "SMTP nao configurado. Codigo disponibilizado localmente.",
-      ...delivery
+      message: "Codigo de recuperacao enviado para o seu email."
     });
   } catch (error) {
     console.error(error);

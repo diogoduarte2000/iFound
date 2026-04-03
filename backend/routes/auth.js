@@ -184,70 +184,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/verify-2fa", async (req, res) => {
-  try {
-    const { email, code } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "Utilizador nao encontrado." });
-    }
-
-    if (user.twoFactorSecret !== code || user.twoFactorExpires < new Date()) {
-      return res.status(400).json({ message: "Codigo invalido ou expirado." });
-    }
-
-    user.isVerified = true;
-    user.twoFactorSecret = null;
-    user.twoFactorExpires = null;
-    await user.save();
-
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.JWT_SECRET || "default_secret_key",
-      { expiresIn: "1d" }
-    );
-
-    res.json({ token, message: "Login efetuado com sucesso!" });
-  } catch (error) {
-    res.status(500).json({ message: "Erro na verificacao do codigo." });
-  }
-});
-
-router.post("/resend-2fa", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "Utilizador nao encontrado." });
-    }
-
-    // Verificar se há um código ativo e se expirou
-    if (!user.twoFactorSecret || user.twoFactorExpires >= new Date()) {
-      return res.status(400).json({ message: "Ja existe um codigo ativo. Aguarde a expiracao ou tente novamente." });
-    }
-
-    // Gerar novo código
-    const code = generate2FACode();
-    user.twoFactorSecret = code;
-    user.twoFactorExpires = new Date(Date.now() + 60 * 1000); // 60 segundos
-    await user.save();
-
-    const delivery = await send2FAEmail(user.email, code);
-
-    res.json({
-      message:
-        delivery.deliveryMode === "email"
-          ? "Novo codigo enviado para o seu email."
-          : "SMTP nao configurado. Novo codigo disponibilizado localmente.",
-      ...delivery,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Erro ao reenviar o codigo." });
-  }
-});
 
 router.post("/forgot-password", async (req, res) => {
   try {

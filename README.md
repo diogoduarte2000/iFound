@@ -5,7 +5,7 @@ O **iFound** é uma plataforma moderna e responsiva cujo propósito é ajudar a 
 ---
 
 ## 🚀 Tecnologias e Stack
-O sistema foi desenvolvido de forma modular através duma arquitetura Full-Stack:
+O sistema foi desenvolvido de forma modular através duma arquitetura Full-Stack
 
 ### Frontend (User Interface)
 * **Angular (v17+)**: Frame de alto desempenho com navegação dinâmica (SPA), configurado com Standalone Components (sem módulos).

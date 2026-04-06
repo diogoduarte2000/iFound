@@ -16,8 +16,8 @@ const {
 
 const router = express.Router();
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend (lazy — only if API key is configured)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const FROM_EMAIL = "noreply@ifound.pt"; // Default sender email
 
 const generate2FACode = () => Math.floor(100000 + Math.random() * 900000).toString();

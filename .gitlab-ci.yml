@@ -63,11 +63,12 @@ deploy:
       EXTERNAL_DOMAIN=${EXTERNAL_DOMAIN}
       INTERNAL_DOMAIN=${INTERNAL_DOMAIN}
       JWT_SECRET=${JWT_SECRET}
-      RESEND_API_KEY=${RESEND_API_KEY}
       SMTP_HOST=${SMTP_HOST}
       SMTP_PORT=${SMTP_PORT}
+      SMTP_SECURE=${SMTP_SECURE}
       SMTP_USER=${SMTP_USER}
       SMTP_PASS=${SMTP_PASS}
+      MAIL_FROM=${MAIL_FROM}
       EOF
 
     # Deploy frontend files and nginx config to Docker volumes

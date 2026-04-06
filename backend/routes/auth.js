@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { Resend } = require("resend");
+const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleware");
@@ -16,72 +16,67 @@ const {
 
 const router = express.Router();
 
-// Initialize Resend (lazy — only if API key is configured)
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const FROM_EMAIL = "noreply@ifound.pt"; // Default sender email
+// Initialize SMTP transporter
+const { isSmtpConfigured } = require("../db");
+const smtpTransporter = isSmtpConfigured()
+  ? nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || "587"),
+      secure: process.env.SMTP_SECURE === "true",
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    })
+  : null;
+const FROM_EMAIL = process.env.MAIL_FROM || "noreply@ifound.pt";
 
 const generate2FACode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 const send2FAEmail = async (email, code) => {
-  try {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY_NOT_CONFIGURED");
-    }
-
-    await resend.emails.send({
-      from: FROM_EMAIL,
-      to: email,
-      subject: "Seu codigo de acesso Ifound",
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
-          <h2 style="margin-bottom: 12px;">Ifound</h2>
-          <p>O seu codigo de acesso e:</p>
-          <p style="font-size: 28px; font-weight: 700; letter-spacing: 4px; margin: 16px 0;">${code}</p>
-          <p>Este codigo expira em 60 segundos.</p>
-        </div>
-      `,
-    });
-
-    return { deliveryMode: "email" };
-  } catch (error) {
-    if (error.message === "RESEND_API_KEY_NOT_CONFIGURED") {
-      console.error("Erro: RESEND_API_KEY nao configurado. Adiciona a variavel de ambiente RESEND_API_KEY no Render.");
-      throw new Error("Email service not configured");
-    }
-    console.error("Erro ao enviar email com Resend:", error);
-    throw error;
+  if (!smtpTransporter) {
+    console.error("Erro: SMTP nao configurado. Adiciona SMTP_HOST, SMTP_USER, SMTP_PASS.");
+    throw new Error("Email service not configured");
   }
+
+  await smtpTransporter.sendMail({
+    from: FROM_EMAIL,
+    to: email,
+    subject: "Seu codigo de acesso Ifound",
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
+        <h2 style="margin-bottom: 12px;">Ifound</h2>
+        <p>O seu codigo de acesso e:</p>
+        <p style="font-size: 28px; font-weight: 700; letter-spacing: 4px; margin: 16px 0;">${code}</p>
+        <p>Este codigo expira em 60 segundos.</p>
+      </div>
+    `,
+  });
+
+  return { deliveryMode: "email" };
 };
 
 const sendPasswordResetEmail = async (email, code) => {
-  try {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY_NOT_CONFIGURED");
-    }
-
-    await resend.emails.send({
-      from: FROM_EMAIL,
-      to: email,
-      subject: "Recuperacao de Palavra-passe Ifound",
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
-          <h2 style="margin-bottom: 12px;">Ifound</h2>
-          <p>O seu codigo de recuperacao e:</p>
-          <p style="font-size: 28px; font-weight: 700; letter-spacing: 4px; margin: 16px 0;">${code}</p>
-          <p>Este codigo expira em 15 minutos. Se nao pediu, pode ignorar este email.</p>
-        </div>
-      `,
-    });
-
-    return { deliveryMode: "email" };
-  } catch (error) {
-    if (error.message === "RESEND_API_KEY_NOT_CONFIGURED") {
-      console.error("Erro: RESEND_API_KEY nao configurado. Adiciona a variavel de ambiente RESEND_API_KEY no Render.");
-      throw new Error("Email service not configured");
-    }
-    console.error("Erro ao enviar email com Resend:", error);
-    throw error;
+  if (!smtpTransporter) {
+    console.error("Erro: SMTP nao configurado. Adiciona SMTP_HOST, SMTP_USER, SMTP_PASS.");
+    throw new Error("Email service not configured");
   }
+
+  await smtpTransporter.sendMail({
+    from: FROM_EMAIL,
+    to: email,
+    subject: "Recuperacao de Palavra-passe Ifound",
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
+        <h2 style="margin-bottom: 12px;">Ifound</h2>
+        <p>O seu codigo de recuperacao e:</p>
+        <p style="font-size: 28px; font-weight: 700; letter-spacing: 4px; margin: 16px 0;">${code}</p>
+        <p>Este codigo expira em 15 minutos. Se nao pediu, pode ignorar este email.</p>
+      </div>
+    `,
+  });
+
+  return { deliveryMode: "email" };
 };
 
 router.post("/register", async (req, res) => {

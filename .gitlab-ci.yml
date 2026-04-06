@@ -9,6 +9,7 @@
 
 variables:
   GIT_SSL_NO_VERIFY: 'true'
+  DOCKER_HOST: "tcp://socket-proxy:2375"
   EXTERNAL_DOMAIN: 'zerodown.top'
   INTERNAL_DOMAIN: 'home.local'
 
@@ -34,21 +35,28 @@ build:frontend:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 # ---------------------------------------------------------------------------
-# Deploy: Build backend image, copy frontend to volume, start services
+# Build: Backend Docker image
+# ---------------------------------------------------------------------------
+build:backend:
+  stage: build
+  image: docker:latest
+  script:
+    - docker build --no-cache --load -t ifound-backend:latest ./backend
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ---------------------------------------------------------------------------
+# Deploy: Copy frontend to volume, start all services
 # ---------------------------------------------------------------------------
 deploy:
   stage: deploy
   image: docker:latest
   needs:
     - build:frontend
-  variables:
-    DOCKER_HOST: "tcp://socket-proxy:2375"
+    - build:backend
   before_script:
     - apk add --no-cache docker-cli-compose
   script:
-    # Build backend Docker image
-    - docker build --no-cache --load -t ifound-backend:latest ./backend
-
     # Generate .env
     - |
       cat > .env << EOF

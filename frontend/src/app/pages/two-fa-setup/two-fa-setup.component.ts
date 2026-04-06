@@ -80,6 +80,12 @@ export class TwoFASetupComponent implements OnInit {
     });
   }
 
+  copyManualKey() {
+    if (this.manualKey) {
+      navigator.clipboard.writeText(this.manualKey);
+    }
+  }
+
   copyBackupCodes() {
     const text = this.backupCodes.join('\n');
     navigator.clipboard.writeText(text).then(() => {

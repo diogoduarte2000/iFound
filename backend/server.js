@@ -15,6 +15,6 @@ app.listen(PORT, async () => {
   }
 
   if (!isSmtpConfigured()) {
-    console.warn("SMTP nao configurado. O envio de email usa Resend.");
+    console.warn("SMTP nao configurado. O envio de emails 2FA e recuperacao nao vai funcionar.");
   }
 });

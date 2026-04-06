@@ -59,7 +59,7 @@ services:
       - "traefik.http.routers.ifound-pub.rule=Host(`ifound.${EXTERNAL_DOMAIN}`)"
       - "traefik.http.routers.ifound-pub.entrypoints=websecure"
       - "traefik.http.routers.ifound-pub.tls=true"
-      - "traefik.http.routers.ifound-pub.middlewares=cloudflare-only@file,error-pages@file"
+      - "traefik.http.routers.ifound-pub.middlewares=cloudflare-only@file"
       - "traefik.http.routers.ifound-pub.service=ifound-svc"
       # Internal: ifound.${INTERNAL_DOMAIN} — self-signed TLS (VPN only)
       - "traefik.http.routers.ifound-int.rule=Host(`ifound.${INTERNAL_DOMAIN}`)"

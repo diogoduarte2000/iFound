@@ -163,7 +163,7 @@ services:
           pids: 50
 
   # ---------------------------------------------------------------------------
-  # MongoDB — Document database (internal only)
+  # MongoDB — Document database (internal + VPN access for management)
   # ---------------------------------------------------------------------------
   ifound-mongo:
     image: mongo:8
@@ -181,6 +181,7 @@ services:
 
     networks:
       - ifound_net
+      - vpn_net
 
     healthcheck:
       test: ["CMD-SHELL", "mongosh --eval 'db.runCommand({ping:1}).ok' --quiet || exit 1"]

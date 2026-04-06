@@ -1,0 +1,207 @@
+###############################################################################
+# iFound — Lost & Found Platform (Angular + Node.js + MongoDB)
+###############################################################################
+# Full-stack app: nginx serves the Angular SPA and proxies /api/ to the
+# Node.js backend. MongoDB provides persistent storage.
+#
+# Networks:
+#   vpn_net     -> Traefik routing (public + internal)
+#   ifound_net  -> internal only (nginx <-> backend <-> mongo)
+#
+# Prerequisites:
+#   - The Server Configuration stack must be running (Traefik, networks)
+#   - DNS pointing to the server (Cloudflare for public, AdGuard for internal)
+#
+# Usage:
+#   docker compose up -d
+###############################################################################
+
+name: ifound
+
+networks:
+  vpn_net:
+    external: true
+  ifound_net:
+    driver: bridge
+    internal: true
+
+volumes:
+  ifound-data:
+    name: ifound-data
+  ifound-config:
+    name: ifound-config
+  ifound-backend-storage:
+    name: ifound-backend-storage
+  ifound-mongo-data:
+    name: ifound-mongo-data
+
+services:
+  # ---------------------------------------------------------------------------
+  # nginx — Angular SPA + API reverse proxy (Traefik-facing)
+  # ---------------------------------------------------------------------------
+  ifound:
+    image: nginx:alpine
+    container_name: ifound
+    restart: unless-stopped
+    depends_on:
+      ifound-backend:
+        condition: service_healthy
+
+    volumes:
+      - ifound-data:/usr/share/nginx/html:ro
+      - ifound-config:/etc/nginx/conf.d:ro
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=vpn_net"
+      # Public: ifound.${EXTERNAL_DOMAIN} — Cloudflare proxied
+      - "traefik.http.routers.ifound-pub.rule=Host(`ifound.${EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.ifound-pub.entrypoints=websecure"
+      - "traefik.http.routers.ifound-pub.tls=true"
+      - "traefik.http.routers.ifound-pub.middlewares=cloudflare-only@file,error-pages@file"
+      - "traefik.http.routers.ifound-pub.service=ifound-svc"
+      # Internal: ifound.${INTERNAL_DOMAIN} — self-signed TLS (VPN only)
+      - "traefik.http.routers.ifound-int.rule=Host(`ifound.${INTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.ifound-int.entrypoints=websecure"
+      - "traefik.http.routers.ifound-int.tls=true"
+      - "traefik.http.routers.ifound-int.service=ifound-svc"
+      # Shared service
+      - "traefik.http.services.ifound-svc.loadbalancer.server.port=80"
+
+    networks:
+      - vpn_net
+      - ifound_net
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    security_opt:
+      - "no-new-privileges:true"
+
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+          pids: 50
+
+  # ---------------------------------------------------------------------------
+  # Node.js Backend — Express API (internal only)
+  # ---------------------------------------------------------------------------
+  ifound-backend:
+    image: ifound-backend:latest
+    pull_policy: never
+    container_name: ifound-backend
+    restart: unless-stopped
+    depends_on:
+      ifound-mongo:
+        condition: service_healthy
+
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGODB_URI=mongodb://ifound-mongo:27017/ifound
+      - JWT_SECRET=${JWT_SECRET}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+
+    volumes:
+      - ifound-backend-storage:/app/storage
+
+    networks:
+      - ifound_net
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1:5000/api/status || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+    security_opt:
+      - "no-new-privileges:true"
+
+    cap_drop:
+      - ALL
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          pids: 50
+
+  # ---------------------------------------------------------------------------
+  # MongoDB — Document database (internal only)
+  # ---------------------------------------------------------------------------
+  ifound-mongo:
+    image: mongo:8
+    container_name: ifound-mongo
+    restart: unless-stopped
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+    environment:
+      - MONGO_INITDB_DATABASE=ifound
+
+    volumes:
+      - ifound-mongo-data:/data/db
+
+    networks:
+      - ifound_net
+
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.runCommand({ping:1}).ok' --quiet || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+    security_opt:
+      - "no-new-privileges:true"
+
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          pids: 100

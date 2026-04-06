@@ -11,7 +11,7 @@ const app = express();
 
 const buildStatusPayload = () => ({
   message: "Backend do Ifound a funcionar!",
-  runtime: process.env.NETLIFY ? "netlify" : process.env.NODE_ENV || "development",
+  runtime: process.env.NODE_ENV || "development",
   databaseConfigured: isDatabaseConfigured(),
   smtpConfigured: isSmtpConfigured(),
   auth: "/api/auth",

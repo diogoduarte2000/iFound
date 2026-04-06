@@ -29,7 +29,7 @@ Esta secção contém a explicação de cada variável que inseres no `.env` (ou
 | :--- | :--- | :--- |
 | **`MONGODB_URI`** | 🔴 Crítico | É o bilhete dourado do MongoDB Atlas. Contém o teu username e password dentro do próprio link (`mongodb+srv://user:pass@cluster...`). Se alguém obtiver isto, pode apagar e roubar todos os registos, chats e acessos dos teus utilizadores na Base de Dados. |
 | **`JWT_SECRET`** | 🔴 Crítico | Usado para assinar os crachás dos utilizadores. Se for descoberto, um atacante pode assinar um crachá manualmente no seu terminal e criar acessos forjados que o teu servidor vai acreditar que são legítimos. Por isso tem de ser um texto longo aleatório, inatingível. |
-| **`CLIENT_URL`** | 🟡 Baixa | O endereço público do teu site alojado no Vercel (ex: `https://ifound.vercel.app`). Avisa o backend: "*Eu conheço este site, não lhe atires um bloqueio CORS.*" |
+| **`CLIENT_URL`** | 🟡 Baixa | O endereço público do teu site (ex: `https://ifound.zerodown.top`). Avisa o backend: "*Eu conheço este site, não lhe atires um bloqueio CORS.*" Na arquitetura Docker com nginx proxy, CORS não é necessário (same-origin). |
 | **`SMTP_HOST` & `PORT`** | 🟢 Aviso | Os endereços técnicos do carteiro que contratares. Se for o Gmail, é `smtp.gmail.com` na porta `465`. |
 | **`SMTP_USER` & `PASS`** | 🔴 Crítico | As credenciais do email. *Aviso para contas Gmail:* Não metas a tua password do dia-a-dia! Tens de ir à tua conta Google, ativar a autenticação em 2 Passos, e criar uma "App Password" específica com 16 letras só para este site. |
 | **`MAIL_FROM`** | 🟢 Info | Opcional. Apenas usado visualmente para as pessoas perceberem quem enviou o email de recuperação (ex: `no-reply@ifound-app.pt`). Se estiver vazio, ele usa o `SMTP_USER`. |

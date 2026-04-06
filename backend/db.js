@@ -6,7 +6,7 @@ const DEFAULT_LOCAL_MONGODB_URI = "mongodb://127.0.0.1:27017/ifound";
 let connectionPromise = null;
 
 const isProductionRuntime = () =>
-  process.env.NODE_ENV === "production" || Boolean(process.env.NETLIFY);
+  process.env.NODE_ENV === "production";
 
 const isDatabaseConfigured = () =>
   Boolean(process.env.MONGODB_URI) || !isProductionRuntime();

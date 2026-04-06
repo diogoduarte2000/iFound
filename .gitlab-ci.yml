@@ -1,0 +1,79 @@
+# =============================================================================
+# iFound CI/CD Pipeline
+# =============================================================================
+# Builds the Angular frontend and Node.js backend, deploys to Docker Compose.
+#
+# Secrets (set as masked CI/CD variables in GitLab):
+#   JWT_SECRET, RESEND_API_KEY, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
+# =============================================================================
+
+variables:
+  GIT_SSL_NO_VERIFY: 'true'
+  EXTERNAL_DOMAIN: 'zerodown.top'
+  INTERNAL_DOMAIN: 'home.local'
+
+stages:
+  - build
+  - deploy
+
+# ---------------------------------------------------------------------------
+# Build: Angular frontend
+# ---------------------------------------------------------------------------
+build:frontend:
+  stage: build
+  image: node:22-alpine
+  script:
+    - cd frontend
+    - npm ci
+    - npx ng build --configuration=production
+  artifacts:
+    paths:
+      - frontend/dist/frontend/browser/
+    expire_in: 1 hour
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ---------------------------------------------------------------------------
+# Deploy: Build backend image, copy frontend to volume, start services
+# ---------------------------------------------------------------------------
+deploy:
+  stage: deploy
+  image: docker:latest
+  needs:
+    - build:frontend
+  variables:
+    DOCKER_HOST: "tcp://socket-proxy:2375"
+  before_script:
+    - apk add --no-cache docker-cli-compose
+  script:
+    # Build backend Docker image
+    - docker build --no-cache --load -t ifound-backend:latest ./backend
+
+    # Generate .env
+    - |
+      cat > .env << EOF
+      EXTERNAL_DOMAIN=${EXTERNAL_DOMAIN}
+      INTERNAL_DOMAIN=${INTERNAL_DOMAIN}
+      JWT_SECRET=${JWT_SECRET}
+      RESEND_API_KEY=${RESEND_API_KEY}
+      SMTP_HOST=${SMTP_HOST}
+      SMTP_PORT=${SMTP_PORT}
+      SMTP_USER=${SMTP_USER}
+      SMTP_PASS=${SMTP_PASS}
+      EOF
+
+    # Deploy frontend files and nginx config to Docker volumes
+    - docker volume create ifound-data 2>/dev/null || true
+    - docker volume create ifound-config 2>/dev/null || true
+    - TEMP="ci-deploy-${CI_JOB_ID}"
+    - docker run -d --name $TEMP -v ifound-data:/site -v ifound-config:/config alpine sleep 120
+    - docker exec $TEMP sh -c "rm -rf /site/*"
+    - tar cf - -C frontend/dist/frontend/browser . | docker exec -i $TEMP tar xf - -C /site
+    - docker cp nginx.conf $TEMP:/config/default.conf
+    - docker exec $TEMP sh -c "echo 'Site files:' && ls /site/ && echo 'Config:' && ls /config/"
+    - docker rm -f $TEMP
+
+    # Start/recreate all services
+    - docker compose up -d --force-recreate --remove-orphans
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

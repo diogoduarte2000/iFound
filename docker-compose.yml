@@ -135,6 +135,7 @@ services:
 
     networks:
       - ifound_net
+      - vpn_net
 
     healthcheck:
       test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1:5000/api/status || exit 1"]

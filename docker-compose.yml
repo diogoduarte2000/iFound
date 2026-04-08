@@ -16,7 +16,7 @@
 #   docker compose up -d
 ###############################################################################
 
-name: ifound
+name: ${STACK_NAME:-ifound}
 
 networks:
   vpn_net:
@@ -27,13 +27,13 @@ networks:
 
 volumes:
   ifound-data:
-    name: ifound-data
+    name: ${STACK_NAME:-ifound}-data
   ifound-config:
-    name: ifound-config
+    name: ${STACK_NAME:-ifound}-config
   ifound-backend-storage:
-    name: ifound-backend-storage
+    name: ${STACK_NAME:-ifound}-backend-storage
   ifound-mongo-data:
-    name: ifound-mongo-data
+    name: ${STACK_NAME:-ifound}-mongo-data
 
 services:
   # ---------------------------------------------------------------------------
@@ -41,7 +41,7 @@ services:
   # ---------------------------------------------------------------------------
   ifound:
     image: nginx:alpine
-    container_name: ifound
+    container_name: ${STACK_NAME:-ifound}
     restart: unless-stopped
     depends_on:
       ifound-backend:
@@ -56,18 +56,18 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=vpn_net"
       # Public: ifound.${EXTERNAL_DOMAIN} — Cloudflare proxied
-      - "traefik.http.routers.ifound-pub.rule=Host(`ifound.${EXTERNAL_DOMAIN}`)"
-      - "traefik.http.routers.ifound-pub.entrypoints=websecure"
-      - "traefik.http.routers.ifound-pub.tls=true"
-      - "traefik.http.routers.ifound-pub.tls.certresolver=le"
-      - "traefik.http.routers.ifound-pub.service=ifound-svc"
+      - "traefik.http.routers.${TRAEFIK_ROUTER_PREFIX:-ifound}-pub.rule=Host(`${APP_SUBDOMAIN:-ifound}.${EXTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.${TRAEFIK_ROUTER_PREFIX:-ifound}-pub.entrypoints=websecure"
+      - "traefik.http.routers.${TRAEFIK_ROUTER_PREFIX:-ifound}-pub.tls=true"
+      - "traefik.http.routers.${TRAEFIK_ROUTER_PREFIX:-ifound}-pub.tls.certresolver=le"
+      - "traefik.http.routers.${TRAEFIK_ROUTER_PREFIX:-ifound}-pub.service=${TRAEFIK_SERVICE_PREFIX:-ifound}-svc"
       # Internal: ifound.${INTERNAL_DOMAIN} — self-signed TLS (VPN only)
-      - "traefik.http.routers.ifound-int.rule=Host(`ifound.${INTERNAL_DOMAIN}`)"
-      - "traefik.http.routers.ifound-int.entrypoints=websecure"
-      - "traefik.http.routers.ifound-int.tls=true"
-      - "traefik.http.routers.ifound-int.service=ifound-svc"
+      - "traefik.http.routers.${TRAEFIK_ROUTER_PREFIX:-ifound}-int.rule=Host(`${APP_SUBDOMAIN:-ifound}.${INTERNAL_DOMAIN}`)"
+      - "traefik.http.routers.${TRAEFIK_ROUTER_PREFIX:-ifound}-int.entrypoints=websecure"
+      - "traefik.http.routers.${TRAEFIK_ROUTER_PREFIX:-ifound}-int.tls=true"
+      - "traefik.http.routers.${TRAEFIK_ROUTER_PREFIX:-ifound}-int.service=${TRAEFIK_SERVICE_PREFIX:-ifound}-svc"
       # Shared service
-      - "traefik.http.services.ifound-svc.loadbalancer.server.port=80"
+      - "traefik.http.services.${TRAEFIK_SERVICE_PREFIX:-ifound}-svc.loadbalancer.server.port=80"
 
     networks:
       - vpn_net
@@ -106,9 +106,9 @@ services:
   # Node.js Backend — Express API (internal only)
   # ---------------------------------------------------------------------------
   ifound-backend:
-    image: ifound-backend:latest
+    image: ${BACKEND_IMAGE:-ifound-backend:latest}
     pull_policy: never
-    container_name: ifound-backend
+    container_name: ${STACK_NAME:-ifound}-backend
     restart: unless-stopped
     depends_on:
       ifound-mongo:
@@ -117,7 +117,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=5000
-      - MONGODB_URI=mongodb://ifound-mongo:27017/ifound
+      - MONGODB_URI=mongodb://ifound-mongo:27017/${MONGO_DB_NAME:-ifound}
       - JWT_SECRET=${JWT_SECRET}
       - SMTP_HOST=${SMTP_HOST:-}
       - SMTP_PORT=${SMTP_PORT:-587}
@@ -167,14 +167,14 @@ services:
   # ---------------------------------------------------------------------------
   ifound-mongo:
     image: mongo:8
-    container_name: ifound-mongo
+    container_name: ${STACK_NAME:-ifound}-mongo
     restart: unless-stopped
 
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
     environment:
-      - MONGO_INITDB_DATABASE=ifound
+      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME:-ifound}
 
     volumes:
       - ifound-mongo-data:/data/db

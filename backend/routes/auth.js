@@ -33,24 +33,139 @@ const FROM_EMAIL = process.env.MAIL_FROM || "noreply@ifound.pt";
 
 const generate2FACode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
+const buildSecurityCodeEmail = ({ title, intro, code, expiry, footnote }) => {
+  const text = [
+    "Ifound",
+    "",
+    title,
+    "",
+    intro,
+    "",
+    `Codigo: ${code}`,
+    expiry,
+    "",
+    footnote,
+  ].join("\n");
+
+  const html = `
+    <!doctype html>
+    <html lang="pt">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${title}</title>
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #eef2f7;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #eef2f7; margin: 0; padding: 32px 12px;">
+          <tr>
+            <td align="center">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px;">
+                <tr>
+                  <td align="center" style="padding: 0 0 16px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="center" style="width: 48px; height: 48px; border-radius: 14px; background-color: #111827; font-family: Arial, sans-serif; font-size: 22px; font-weight: 700; color: #ffffff;">
+                          i
+                        </td>
+                        <td style="padding-left: 12px; font-family: Arial, sans-serif; font-size: 24px; font-weight: 700; color: #111827;">
+                          Ifound
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #dbe3ee; border-radius: 28px;">
+                      <tr>
+                        <td style="padding: 32px 32px 20px;">
+                          <div style="display: inline-block; padding: 6px 10px; border-radius: 999px; background-color: #eef2ff; font-family: Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #3730a3;">
+                            Verificacao de seguranca
+                          </div>
+                          <h1 style="margin: 16px 0 12px; font-family: Arial, sans-serif; font-size: 30px; line-height: 1.2; color: #111827;">
+                            ${title}
+                          </h1>
+                          <p style="margin: 0; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.75; color: #4b5563;">
+                            ${intro}
+                          </p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 0 32px 24px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #0f172a; border-radius: 24px;">
+                            <tr>
+                              <td align="center" style="padding: 18px 16px 8px; font-family: Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #94a3b8;">
+                                Codigo de acesso
+                              </td>
+                            </tr>
+                            <tr>
+                              <td align="center" style="padding: 0 16px 18px; font-family: Arial, sans-serif; font-size: 42px; line-height: 1; font-weight: 700; letter-spacing: 0.34em; color: #ffffff;">
+                                ${code}
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 0 32px 32px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="padding: 0 0 16px; font-family: Arial, sans-serif; font-size: 15px; line-height: 1.7; color: #374151;">
+                                ${expiry}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 0 0 20px; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.75; color: #6b7280;">
+                                ${footnote}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 18px 20px; border: 1px solid #e5e7eb; border-radius: 18px; background-color: #f9fafb; font-family: Arial, sans-serif; font-size: 13px; line-height: 1.7; color: #6b7280;">
+                                Por seguranca, nunca partilhe este codigo. A equipa Ifound nunca o pedira por email, telefone ou mensagem.
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding: 16px 20px 0; font-family: Arial, sans-serif; font-size: 12px; line-height: 1.7; color: #94a3b8;">
+                    Enviado automaticamente por Ifound. Nao responda a este email.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+  `;
+
+  return { html, text };
+};
+
 const send2FAEmail = async (email, code) => {
   if (!smtpTransporter) {
     console.error("Erro: SMTP nao configurado. Adiciona SMTP_HOST, SMTP_USER, SMTP_PASS.");
     throw new Error("Email service not configured");
   }
 
+  const emailContent = buildSecurityCodeEmail({
+    title: "Confirme o seu acesso",
+    intro: "Recebemos um pedido de autenticacao para a sua conta Ifound. Use o codigo abaixo para concluir o acesso em seguranca.",
+    code,
+    expiry: "Este codigo expira em 60 segundos.",
+    footnote: "Se nao reconhece este pedido, ignore este email. O acesso nao sera concluido sem a introducao deste codigo.",
+  });
+
   await smtpTransporter.sendMail({
     from: FROM_EMAIL,
     to: email,
     subject: "Seu codigo de acesso Ifound",
-    html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
-        <h2 style="margin-bottom: 12px;">Ifound</h2>
-        <p>O seu codigo de acesso e:</p>
-        <p style="font-size: 28px; font-weight: 700; letter-spacing: 4px; margin: 16px 0;">${code}</p>
-        <p>Este codigo expira em 60 segundos.</p>
-      </div>
-    `,
+    text: emailContent.text,
+    html: emailContent.html,
   });
 
   return { deliveryMode: "email" };
@@ -62,18 +177,20 @@ const sendPasswordResetEmail = async (email, code) => {
     throw new Error("Email service not configured");
   }
 
+  const emailContent = buildSecurityCodeEmail({
+    title: "Recupere a sua palavra-passe",
+    intro: "Recebemos um pedido para redefinir a palavra-passe da sua conta Ifound. Use o codigo abaixo para continuar.",
+    code,
+    expiry: "Este codigo expira em 15 minutos.",
+    footnote: "Se nao pediu esta recuperacao, ignore este email e mantenha a sua conta sob observacao.",
+  });
+
   await smtpTransporter.sendMail({
     from: FROM_EMAIL,
     to: email,
     subject: "Recuperacao de Palavra-passe Ifound",
-    html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #0f172a;">
-        <h2 style="margin-bottom: 12px;">Ifound</h2>
-        <p>O seu codigo de recuperacao e:</p>
-        <p style="font-size: 28px; font-weight: 700; letter-spacing: 4px; margin: 16px 0;">${code}</p>
-        <p>Este codigo expira em 15 minutos. Se nao pediu, pode ignorar este email.</p>
-      </div>
-    `,
+    text: emailContent.text,
+    html: emailContent.html,
   });
 
   return { deliveryMode: "email" };

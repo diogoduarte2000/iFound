@@ -32,7 +32,7 @@ build:frontend:
       - frontend/dist/frontend/browser/
     expire_in: 1 hour
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH
 
 # ---------------------------------------------------------------------------
 # Build: Backend Docker image
@@ -41,9 +41,11 @@ build:backend:
   stage: build
   image: docker:latest
   script:
-    - docker build --no-cache --load -t ifound-backend:latest ./backend
+    - docker build --no-cache --load -t ${BACKEND_IMAGE} ./backend
+  variables:
+    BACKEND_IMAGE: "ifound-backend:${CI_COMMIT_SHA}"
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH
 
 # ---------------------------------------------------------------------------
 # Deploy: Copy frontend to volume, start all services
@@ -60,6 +62,12 @@ deploy:
     # Generate .env
     - |
       cat > .env << EOF
+      STACK_NAME=${STACK_NAME}
+      APP_SUBDOMAIN=${APP_SUBDOMAIN}
+      TRAEFIK_ROUTER_PREFIX=${TRAEFIK_ROUTER_PREFIX}
+      TRAEFIK_SERVICE_PREFIX=${TRAEFIK_SERVICE_PREFIX}
+      BACKEND_IMAGE=${BACKEND_IMAGE}
+      MONGO_DB_NAME=${MONGO_DB_NAME}
       EXTERNAL_DOMAIN=${EXTERNAL_DOMAIN}
       INTERNAL_DOMAIN=${INTERNAL_DOMAIN}
       JWT_SECRET=${JWT_SECRET}
@@ -72,10 +80,12 @@ deploy:
       EOF
 
     # Deploy frontend files and nginx config to Docker volumes
-    - docker volume create ifound-data 2>/dev/null || true
-    - docker volume create ifound-config 2>/dev/null || true
-    - TEMP="ci-deploy-${CI_JOB_ID}"
-    - docker run -d --name $TEMP -v ifound-data:/site -v ifound-config:/config alpine sleep 120
+    - export SITE_VOLUME="${STACK_NAME}-data"
+    - export CONFIG_VOLUME="${STACK_NAME}-config"
+    - docker volume create "${SITE_VOLUME}" 2>/dev/null || true
+    - docker volume create "${CONFIG_VOLUME}" 2>/dev/null || true
+    - TEMP="${STACK_NAME}-ci-${CI_JOB_ID}"
+    - docker run -d --name $TEMP -v "${SITE_VOLUME}:/site" -v "${CONFIG_VOLUME}:/config" alpine sleep 120
     - docker exec $TEMP sh -c "rm -rf /site/*"
     - tar cf - -C frontend/dist/frontend/browser . | docker exec -i $TEMP tar xf - -C /site
     - docker cp nginx.conf $TEMP:/config/default.conf
@@ -84,5 +94,114 @@ deploy:
 
     # Start/recreate all services
     - docker compose up -d --force-recreate --remove-orphans
+  variables:
+    STACK_NAME: "ifound"
+    APP_SUBDOMAIN: "ifound"
+    TRAEFIK_ROUTER_PREFIX: "ifound"
+    TRAEFIK_SERVICE_PREFIX: "ifound"
+    BACKEND_IMAGE: "ifound-backend:${CI_COMMIT_SHA}"
+    MONGO_DB_NAME: "ifound"
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ---------------------------------------------------------------------------
+# Deploy Preview: Manual branch environment
+# Requires DNS/wildcard routing for ifound-<branch>.zerodown.top and/or
+# ifound-<branch>.home.local
+# ---------------------------------------------------------------------------
+deploy:preview:
+  stage: deploy
+  image: docker:latest
+  needs:
+    - build:frontend
+    - build:backend
+  before_script:
+    - apk add --no-cache docker-cli-compose
+  script:
+    - |
+      cat > .env << EOF
+      STACK_NAME=${STACK_NAME}
+      APP_SUBDOMAIN=${APP_SUBDOMAIN}
+      TRAEFIK_ROUTER_PREFIX=${TRAEFIK_ROUTER_PREFIX}
+      TRAEFIK_SERVICE_PREFIX=${TRAEFIK_SERVICE_PREFIX}
+      BACKEND_IMAGE=${BACKEND_IMAGE}
+      MONGO_DB_NAME=${MONGO_DB_NAME}
+      EXTERNAL_DOMAIN=${EXTERNAL_DOMAIN}
+      INTERNAL_DOMAIN=${INTERNAL_DOMAIN}
+      JWT_SECRET=${JWT_SECRET}
+      SMTP_HOST=${SMTP_HOST}
+      SMTP_PORT=${SMTP_PORT}
+      SMTP_SECURE=${SMTP_SECURE}
+      SMTP_USER=${SMTP_USER}
+      SMTP_PASS=${SMTP_PASS}
+      MAIL_FROM=${MAIL_FROM}
+      EOF
+
+    - export SITE_VOLUME="${STACK_NAME}-data"
+    - export CONFIG_VOLUME="${STACK_NAME}-config"
+    - docker volume create "${SITE_VOLUME}" 2>/dev/null || true
+    - docker volume create "${CONFIG_VOLUME}" 2>/dev/null || true
+    - TEMP="${STACK_NAME}-ci-${CI_JOB_ID}"
+    - docker run -d --name $TEMP -v "${SITE_VOLUME}:/site" -v "${CONFIG_VOLUME}:/config" alpine sleep 120
+    - docker exec $TEMP sh -c "rm -rf /site/*"
+    - tar cf - -C frontend/dist/frontend/browser . | docker exec -i $TEMP tar xf - -C /site
+    - docker cp nginx.conf $TEMP:/config/default.conf
+    - docker exec $TEMP sh -c "echo 'Site files:' && ls /site/ && echo 'Config:' && ls /config/"
+    - docker rm -f $TEMP
+    - docker compose up -d --force-recreate --remove-orphans
+  variables:
+    STACK_NAME: "ifound-${CI_COMMIT_REF_SLUG}"
+    APP_SUBDOMAIN: "ifound-${CI_COMMIT_REF_SLUG}"
+    TRAEFIK_ROUTER_PREFIX: "ifound-${CI_COMMIT_REF_SLUG}"
+    TRAEFIK_SERVICE_PREFIX: "ifound-${CI_COMMIT_REF_SLUG}"
+    BACKEND_IMAGE: "ifound-backend:${CI_COMMIT_SHA}"
+    MONGO_DB_NAME: "ifound-${CI_COMMIT_REF_SLUG}"
+  environment:
+    name: "preview/${CI_COMMIT_REF_SLUG}"
+    url: "https://${APP_SUBDOMAIN}.${EXTERNAL_DOMAIN}"
+    on_stop: stop:preview
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: manual
+
+# ---------------------------------------------------------------------------
+# Stop Preview: Manual cleanup for branch environment
+# ---------------------------------------------------------------------------
+stop:preview:
+  stage: deploy
+  image: docker:latest
+  before_script:
+    - apk add --no-cache docker-cli-compose
+  script:
+    - |
+      cat > .env << EOF
+      STACK_NAME=${STACK_NAME}
+      APP_SUBDOMAIN=${APP_SUBDOMAIN}
+      TRAEFIK_ROUTER_PREFIX=${TRAEFIK_ROUTER_PREFIX}
+      TRAEFIK_SERVICE_PREFIX=${TRAEFIK_SERVICE_PREFIX}
+      BACKEND_IMAGE=${BACKEND_IMAGE}
+      MONGO_DB_NAME=${MONGO_DB_NAME}
+      EXTERNAL_DOMAIN=${EXTERNAL_DOMAIN}
+      INTERNAL_DOMAIN=${INTERNAL_DOMAIN}
+      JWT_SECRET=${JWT_SECRET}
+      SMTP_HOST=${SMTP_HOST}
+      SMTP_PORT=${SMTP_PORT}
+      SMTP_SECURE=${SMTP_SECURE}
+      SMTP_USER=${SMTP_USER}
+      SMTP_PASS=${SMTP_PASS}
+      MAIL_FROM=${MAIL_FROM}
+      EOF
+    - docker compose down --remove-orphans --volumes
+  variables:
+    STACK_NAME: "ifound-${CI_COMMIT_REF_SLUG}"
+    APP_SUBDOMAIN: "ifound-${CI_COMMIT_REF_SLUG}"
+    TRAEFIK_ROUTER_PREFIX: "ifound-${CI_COMMIT_REF_SLUG}"
+    TRAEFIK_SERVICE_PREFIX: "ifound-${CI_COMMIT_REF_SLUG}"
+    BACKEND_IMAGE: "ifound-backend:${CI_COMMIT_SHA}"
+    MONGO_DB_NAME: "ifound-${CI_COMMIT_REF_SLUG}"
+  environment:
+    name: "preview/${CI_COMMIT_REF_SLUG}"
+    action: stop
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: manual

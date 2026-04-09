@@ -125,6 +125,8 @@ services:
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASS=${SMTP_PASS:-}
       - MAIL_FROM=${MAIL_FROM:-no-reply@zerodown.top}
+      - NODE_CLUSTER_WORKERS=${NODE_CLUSTER_WORKERS:-1}
+      - CHAT_REALTIME_SHARED_BACKPLANE=${CHAT_REALTIME_SHARED_BACKPLANE:-false}
 
     volumes:
       - ifound-backend-storage:/app/storage

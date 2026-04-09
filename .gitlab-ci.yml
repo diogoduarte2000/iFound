@@ -7,6 +7,9 @@
 #   JWT_SECRET, RESEND_API_KEY, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
 # =============================================================================
 
+workflow:
+  name: "TECNICAL CHANGES 2.0"
+
 variables:
   GIT_SSL_NO_VERIFY: 'true'
   DOCKER_HOST: "tcp://socket-proxy:2375"

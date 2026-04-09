@@ -28,7 +28,7 @@ export class ChatsComponent implements OnInit, OnDestroy {
   selectedChatFiles: File[] = [];
   selectedChatPreviews: { name: string; url: string }[] = [];
 
-  private chatPollInterval: ReturnType<typeof setInterval> | null = null;
+  private chatStream: EventSource | null = null;
   private publicationIdFromRoute: string | null = null;
   private chatIdFromRoute: string | null = null;
   private ownerViewFromRoute = false;
@@ -47,6 +47,7 @@ export class ChatsComponent implements OnInit, OnDestroy {
     }
 
     this.currentUserId = this.authService.getCurrentUser()?.id || '';
+    this.startLiveChatStream();
     this.loadConversations();
 
     this.route.queryParamMap.subscribe((params) => {
@@ -58,7 +59,7 @@ export class ChatsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.stopChatPolling();
+    this.stopLiveChatStream();
     this.clearSelectedChatFiles();
   }
 
@@ -98,7 +99,6 @@ export class ChatsComponent implements OnInit, OnDestroy {
         this.chatInfo = 'Apenas tu e a outra pessoa conseguem ver estas mensagens.';
         this.isChatLoading = false;
         this.syncConversationSummary(conversation);
-        this.startChatPolling();
       },
       error: (err: HttpErrorResponse) => {
         this.isChatLoading = false;
@@ -122,7 +122,6 @@ export class ChatsComponent implements OnInit, OnDestroy {
         this.chatInfo = 'Apenas tu e a outra pessoa conseguem ver estas mensagens.';
         this.isChatLoading = false;
         this.syncConversationSummary(conversation);
-        this.startChatPolling();
       },
       error: (err: HttpErrorResponse) => {
         this.isChatLoading = false;
@@ -199,7 +198,6 @@ export class ChatsComponent implements OnInit, OnDestroy {
           this.isSendingMessage = false;
           this.clearSelectedChatFiles();
           this.syncConversationSummary(conversation);
-          this.loadConversations();
         },
         error: (err: HttpErrorResponse) => {
           this.isSendingMessage = false;
@@ -278,27 +276,41 @@ export class ChatsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private startChatPolling() {
-    this.stopChatPolling();
+  private startLiveChatStream() {
+    this.stopLiveChatStream();
 
-    this.chatPollInterval = setInterval(() => {
-      this.loadConversations();
-
-      if (this.activeConversation?._id) {
-        this.chatService.getConversation(this.activeConversation._id).subscribe({
-          next: (conversation) => {
-            this.activeConversation = conversation;
-            this.syncConversationSummary(conversation);
-          }
-        });
+    this.chatStream = this.chatService.openRealtimeStream({
+      connected: () => {
+        this.conversationError = '';
+      },
+      chatUpdated: (payload) => {
+        this.applyRealtimeConversationUpdate(payload?.conversation);
+      },
+      error: () => {
+        if (!this.conversationError) {
+          this.conversationError = 'Ligacao em tempo real instavel. As conversas vao tentar voltar automaticamente.';
+        }
       }
-    }, 5000);
+    });
   }
 
-  private stopChatPolling() {
-    if (this.chatPollInterval) {
-      clearInterval(this.chatPollInterval);
-      this.chatPollInterval = null;
+  private stopLiveChatStream() {
+    if (this.chatStream) {
+      this.chatStream.close();
+      this.chatStream = null;
+    }
+  }
+
+  private applyRealtimeConversationUpdate(conversation: any) {
+    if (!conversation?._id) {
+      return;
+    }
+
+    this.conversationError = '';
+    this.syncConversationSummary(conversation);
+
+    if (this.activeConversation?._id === conversation._id) {
+      this.activeConversation = conversation;
     }
   }
 

@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const Chat = require("../models/Chat");
 const Publication = require("../models/Publication");
 const authMiddleware = require("../middleware/authMiddleware");
+const { publishToUsers, registerClient, writeEvent } = require("../liveChatHub");
 
 const router = express.Router();
 const ATTACHMENT_TTL_MS = 12 * 60 * 60 * 1000;
@@ -20,6 +21,9 @@ if (!fsSync.existsSync(uploadRoot)) {
 
 const ensureParticipant = (chat, userId) =>
   chat.participants.some((participant) => participant.toString() === userId);
+
+const getParticipantIds = (chat) =>
+  chat.participants.map((participant) => String(participant._id || participant));
 
 const getAttachmentExtension = (originalName, mimeType) => {
   const existingExtension = path.extname(originalName || "");
@@ -133,6 +137,59 @@ const getChatSummary = async (chat) => {
   };
 };
 
+const buildChatSummaryFromSerialized = (conversation) => {
+  const lastMessage = conversation.messages[conversation.messages.length - 1] || null;
+
+  return {
+    _id: conversation._id,
+    publication: conversation.publication,
+    participants: conversation.participants,
+    updatedAt: conversation.updatedAt,
+    lastMessage: lastMessage
+      ? {
+          _id: lastMessage._id,
+          sender: lastMessage.sender,
+          text: lastMessage.text,
+          createdAt: lastMessage.createdAt,
+          hasAttachments: lastMessage.attachments.length > 0,
+        }
+      : null,
+  };
+};
+
+const publishChatUpdate = async (chat) => {
+  const conversation = await serializeChat(chat);
+  const payload = {
+    conversation,
+    summary: buildChatSummaryFromSerialized(conversation),
+  };
+
+  publishToUsers(getParticipantIds(chat), "chat-updated", payload);
+  return payload;
+};
+
+router.get("/stream", authMiddleware, (req, res) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders?.();
+  res.socket?.setKeepAlive?.(true);
+
+  const unregister = registerClient(req.user.id, res);
+  const heartbeat = setInterval(() => {
+    res.write(": keep-alive\n\n");
+  }, 25000);
+
+  writeEvent(res, "connected", { userId: req.user.id, timestamp: new Date().toISOString() });
+
+  req.on("close", () => {
+    clearInterval(heartbeat);
+    unregister();
+    res.end();
+  });
+});
+
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const chats = await Chat.find({ participants: req.user.id }).sort({ updatedAt: -1 });
@@ -154,6 +211,7 @@ router.post("/open", authMiddleware, async (req, res) => {
   try {
     const { publicationId } = req.body;
     const publication = await Publication.findById(publicationId);
+    let createdNow = false;
 
     if (!publication) {
       return res.status(404).json({ message: "Comunicacao nao encontrada." });
@@ -174,10 +232,20 @@ router.post("/open", authMiddleware, async (req, res) => {
         participants: [req.user.id, publication.author],
         messages: [],
       });
+      createdNow = true;
     }
 
     await cleanupExpiredAttachments(chat);
-    res.json(await serializeChat(chat));
+    const conversation = await serializeChat(chat);
+
+    if (createdNow) {
+      publishToUsers(getParticipantIds(chat), "chat-updated", {
+        conversation,
+        summary: buildChatSummaryFromSerialized(conversation),
+      });
+    }
+
+    res.json(conversation);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erro ao abrir conversa." });
@@ -257,8 +325,9 @@ router.post("/:chatId/messages", authMiddleware, async (req, res) => {
 
     await chat.save();
     await cleanupExpiredAttachments(chat);
+    const payload = await publishChatUpdate(chat);
 
-    res.status(201).json(await serializeChat(chat));
+    res.status(201).json(payload.conversation);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erro ao enviar mensagem." });

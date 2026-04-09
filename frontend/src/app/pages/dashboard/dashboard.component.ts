@@ -73,7 +73,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.syncVariantOptions(String(model || ''));
     });
 
-    this.pubForm.get('imei')?.valueChanges.subscribe(() => {
+    this.pubForm.get('imei')?.valueChanges.subscribe((value) => {
+      const normalizedImei = String(value || '').replace(/\D/g, '').slice(0, 15);
+
+      if (String(value || '') !== normalizedImei) {
+        this.pubForm.patchValue({ imei: normalizedImei }, { emitEvent: false });
+      }
+
       this.imeiValidationState = 'idle';
       this.imeiValidationMessage = '';
     });
@@ -258,6 +264,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (!/^\d{15}$/.test(imei)) {
+      this.imeiValidationState = 'invalid';
+      this.imeiValidationMessage = 'O IMEI deve ter exatamente 15 digitos numericos.';
+      return;
+    }
+
     this.imeiValidationState = 'checking';
     this.imeiValidationMessage = 'A validar IMEI...';
 
@@ -275,6 +287,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   onSubmitPublication() {
     this.hasAttemptedSubmit = true;
+    const imei = String(this.pubForm.get('imei')?.value || '').trim();
+
+    if (imei && !/^\d{15}$/.test(imei)) {
+      this.message = 'O IMEI deve ter exatamente 15 digitos numericos.';
+      this.imeiValidationState = 'invalid';
+      this.imeiValidationMessage = this.message;
+      return;
+    }
 
     if (this.pubForm.invalid) {
       this.pubForm.markAllAsTouched();

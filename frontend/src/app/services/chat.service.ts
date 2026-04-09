@@ -36,6 +36,34 @@ export class ChatService {
     return this.http.post<any>(`${this.apiUrl}/${chatId}/messages`, payload, this.getAuthHeaders());
   }
 
+  openRealtimeStream(handlers: {
+    connected?: (payload: any) => void;
+    chatUpdated?: (payload: any) => void;
+    error?: () => void;
+  }): EventSource | null {
+    const token = this.authService.getToken();
+    if (!token) {
+      return null;
+    }
+
+    const streamUrl = `${resolveBackendUrl('/api/chats/stream')}?token=${encodeURIComponent(token)}`;
+    const eventSource = new EventSource(streamUrl);
+
+    eventSource.addEventListener('connected', (event) => {
+      handlers.connected?.(JSON.parse((event as MessageEvent).data));
+    });
+
+    eventSource.addEventListener('chat-updated', (event) => {
+      handlers.chatUpdated?.(JSON.parse((event as MessageEvent).data));
+    });
+
+    eventSource.onerror = () => {
+      handlers.error?.();
+    };
+
+    return eventSource;
+  }
+
   resolveAttachmentUrl(url: string): string {
     const token = this.authService.getToken();
     const resolvedUrl = resolveBackendUrl(url);

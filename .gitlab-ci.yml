@@ -80,6 +80,8 @@ deploy:
       SMTP_USER=${SMTP_USER}
       SMTP_PASS=${SMTP_PASS}
       MAIL_FROM=${MAIL_FROM}
+      NODE_CLUSTER_WORKERS=1
+      CHAT_REALTIME_SHARED_BACKPLANE=false
       EOF
 
     # Deploy frontend files and nginx config to Docker volumes
@@ -138,6 +140,8 @@ deploy:preview:
       SMTP_USER=${SMTP_USER}
       SMTP_PASS=${SMTP_PASS}
       MAIL_FROM=${MAIL_FROM}
+      NODE_CLUSTER_WORKERS=1
+      CHAT_REALTIME_SHARED_BACKPLANE=false
       EOF
 
     - export SITE_VOLUME="${STACK_NAME}-data"
@@ -193,6 +197,8 @@ stop:preview:
       SMTP_USER=${SMTP_USER}
       SMTP_PASS=${SMTP_PASS}
       MAIL_FROM=${MAIL_FROM}
+      NODE_CLUSTER_WORKERS=1
+      CHAT_REALTIME_SHARED_BACKPLANE=false
       EOF
     - docker compose down --remove-orphans --volumes
   variables:

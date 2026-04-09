@@ -270,23 +270,41 @@
 
           <div class="grid gap-6 md:grid-cols-2">
             <label class="space-y-2">
-              <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Equipamento *</span>
+              <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Modelo Apple *</span>
               <select formControlName="model" class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent">
                 <option value="" disabled selected>Selecionar versão</option>
-                @for(m of modelosIphone; track m) {
-                  <option [value]="m">{{ m }}</option>
+                @for(device of iphoneCatalog; track device.model) {
+                  <option [value]="device.model">{{ device.model }}</option>
+                }
+              </select>
+              @if(catalogError) {
+                <p class="text-[12px] text-[#e30000]">{{ catalogError }}</p>
+              } @else if(catalogSourceUrl) {
+                <p class="text-[12px] text-[#86868b]">
+                  Catalogo Apple sincronizado em {{ catalogSyncedAt }}.
+                  <a [href]="catalogSourceUrl" target="_blank" rel="noreferrer" class="text-[#0066cc] hover:underline">Fonte oficial</a>
+                </p>
+              }
+            </label>
+
+            <label class="space-y-2">
+              <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Cor oficial *</span>
+              <select formControlName="color" [disabled]="availableColors.length === 0" class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent disabled:cursor-not-allowed disabled:opacity-60">
+                <option value="">{{ availableColors.length ? 'Selecionar cor' : 'Escolha primeiro o modelo' }}</option>
+                @for(colorOption of availableColors; track colorOption) {
+                  <option [value]="colorOption">{{ colorOption }}</option>
                 }
               </select>
             </label>
 
             <label class="space-y-2">
-              <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Acabamento *</span>
-              <input type="text" formControlName="color" placeholder="Ex. Preto Sideral" class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent">
-            </label>
-
-            <label class="space-y-2">
-              <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Armazenamento</span>
-              <input type="text" formControlName="storage" placeholder="Ex. 256 GB" class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent">
+              <span class="text-[13px] font-semibold text-[#86868b] uppercase tracking-wider">Memoria</span>
+              <select formControlName="storage" [disabled]="availableStorages.length === 0" class="w-full rounded-[12px] bg-[#f5f5f7] px-4 py-[14px] text-[15px] text-[#1d1d1f] outline-none transition focus:bg-white focus:ring-[3px] focus:ring-[#0066cc]/40 border-transparent disabled:cursor-not-allowed disabled:opacity-60">
+                <option value="">{{ availableStorages.length ? 'Nao indicar / nao sei' : 'Escolha primeiro o modelo' }}</option>
+                @for(storageOption of availableStorages; track storageOption) {
+                  <option [value]="storageOption">{{ storageOption }}</option>
+                }
+              </select>
             </label>
 
             <label class="space-y-2">

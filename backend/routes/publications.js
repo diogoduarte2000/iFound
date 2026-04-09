@@ -1,6 +1,8 @@
 const express = require("express");
 const Publication = require("../models/Publication");
 const authMiddleware = require("../middleware/authMiddleware");
+const { findAppleIphoneByModel } = require("../data/appleIphoneCatalog");
+const { getImeiValidationResult } = require("../utils/imei");
 
 const router = express.Router();
 
@@ -10,6 +12,8 @@ const MAX_ONLINE_PUBLICATIONS = 3;
 const PENDING_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000;
 const ONLINE_LIFETIME_MS = 90 * 24 * 60 * 60 * 1000;
 const RESOLVED_RETENTION_MS = 5 * 60 * 1000;
+
+const normalizeTextField = (value) => String(value || "").trim();
 
 const expirePublications = async (authorId) => {
   const now = new Date();
@@ -51,14 +55,50 @@ const expirePublications = async (authorId) => {
 
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    const { type, model, color, storage, imei, distinctiveMarks, zone, exactLocation, dateOfEvent, photo } = req.body;
+    const type = normalizeTextField(req.body.type);
+    const model = normalizeTextField(req.body.model);
+    const color = normalizeTextField(req.body.color);
+    const storage = normalizeTextField(req.body.storage);
+    const imei = normalizeTextField(req.body.imei);
+    const distinctiveMarks = normalizeTextField(req.body.distinctiveMarks);
+    const zone = normalizeTextField(req.body.zone);
+    const exactLocation = normalizeTextField(req.body.exactLocation);
+    const dateOfEvent = req.body.dateOfEvent;
+    const photo = req.body.photo;
 
     if (!["Perdido", "Achado"].includes(type)) {
       return res.status(400).json({ message: "Tipo invalido." });
     }
 
+    if (!model || !color || !zone || !dateOfEvent) {
+      return res.status(400).json({ message: "Faltam campos obrigatorios na publicacao." });
+    }
+
     if (!photo) {
       return res.status(400).json({ message: "É obrigatório anexar uma fotografia." });
+    }
+
+    const catalogModel = findAppleIphoneByModel(model);
+
+    if (catalogModel) {
+      if (!catalogModel.colors.includes(color)) {
+        return res.status(400).json({ message: "A cor selecionada nao corresponde ao modelo escolhido." });
+      }
+
+      if (storage && !catalogModel.storages.includes(storage)) {
+        return res.status(400).json({ message: "A memoria selecionada nao corresponde ao modelo escolhido." });
+      }
+    }
+
+    let normalizedImei = "";
+    if (imei) {
+      const imeiValidation = getImeiValidationResult(imei);
+
+      if (!imeiValidation.isValid) {
+        return res.status(400).json({ message: imeiValidation.reason });
+      }
+
+      normalizedImei = imeiValidation.normalizedImei;
     }
 
     await expirePublications(req.user.id);
@@ -79,7 +119,7 @@ router.post("/", authMiddleware, async (req, res) => {
       model,
       color,
       storage,
-      imei,
+      imei: normalizedImei,
       distinctiveMarks,
       zone,
       exactLocation,

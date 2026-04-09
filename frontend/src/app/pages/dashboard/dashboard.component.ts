@@ -6,6 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 import { PublicationService } from '../../services/publication.service';
 import { AuthService } from '../../services/auth.service';
 import { ChatService } from '../../services/chat.service';
+import { DeviceService, IphoneCatalogItem, ImeiValidationResponse } from '../../services/device.service';
 import { PORTUGAL_LOCATIONS } from '../../shared/portugal-locations';
 
 @Component({
@@ -33,48 +34,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   message = '';
   conversationError = '';
   photoPreview: string | null = null;
-  photoError: string = '';
+  photoError = '';
+  catalogError = '';
+  catalogSourceUrl = '';
+  catalogSyncedAt = '';
+  imeiValidationMessage = '';
+  imeiValidationState: 'idle' | 'checking' | 'valid' | 'invalid' = 'idle';
+  iphoneCatalog: IphoneCatalogItem[] = [];
+  availableColors: string[] = [];
+  availableStorages: string[] = [];
 
   readonly locationOptions = PORTUGAL_LOCATIONS;
-  readonly modelosIphone = [
-    'iPhone 16 Pro Max',
-    'iPhone 16 Pro',
-    'iPhone 16 Plus',
-    'iPhone 16',
-    'iPhone 16e',
-    'iPhone 15 Pro Max',
-    'iPhone 15 Pro',
-    'iPhone 15 Plus',
-    'iPhone 15',
-    'iPhone 14 Pro Max',
-    'iPhone 14 Pro',
-    'iPhone 14 Plus',
-    'iPhone 14',
-    'iPhone 13 Pro Max',
-    'iPhone 13 Pro',
-    'iPhone 13 mini',
-    'iPhone 13',
-    'iPhone 12 Pro Max',
-    'iPhone 12 Pro',
-    'iPhone 12 mini',
-    'iPhone 12',
-    'iPhone 11 Pro Max',
-    'iPhone 11 Pro',
-    'iPhone 11',
-    'iPhone SE (3a geração)',
-    'iPhone SE (2a geração)',
-    'iPhone XR',
-    'iPhone XS Max',
-    'iPhone XS',
-    'iPhone X',
-    'iPhone 8 Plus',
-    'iPhone 8',
-    'iPhone 7 Plus',
-    'iPhone 7',
-    'iPhone 6s Plus',
-    'iPhone 6s',
-    'Outro / Antigo'
-  ];
 
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
@@ -82,6 +52,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private pubService: PublicationService,
     private authService: AuthService,
     private chatService: ChatService,
+    private deviceService: DeviceService,
     private fb: FormBuilder,
     private router: Router
   ) {
@@ -97,6 +68,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
       dateOfEvent: ['', Validators.required],
       photo: [null, Validators.required]
     });
+
+    this.pubForm.get('model')?.valueChanges.subscribe((model) => {
+      this.syncVariantOptions(String(model || ''));
+    });
+
+    this.pubForm.get('imei')?.valueChanges.subscribe(() => {
+      this.imeiValidationState = 'idle';
+      this.imeiValidationMessage = '';
+    });
   }
 
   ngOnInit() {
@@ -106,6 +86,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     this.currentUserId = this.authService.getCurrentUser()?.id || '';
+    this.loadIphoneCatalog();
     this.loadPublications();
     this.loadConversations();
   }
@@ -149,12 +130,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!file) return;
 
     if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
-      this.photoError = 'Formato inválido. Apenas JPG ou PNG.';
+      this.photoError = 'Formato invalido. Apenas JPG ou PNG.';
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      this.photoError = 'Imagem muito grande. O limite é 2MB.';
+      this.photoError = 'Imagem muito grande. O limite e 2MB.';
       return;
     }
 
@@ -174,12 +155,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
             height *= MAX_WIDTH / width;
             width = MAX_WIDTH;
           }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
+        } else if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
         }
+
         canvas.width = width;
         canvas.height = height;
         ctx?.drawImage(img, 0, 0, width, height);
@@ -252,12 +232,58 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadIphoneCatalog() {
+    this.catalogError = '';
+
+    this.deviceService.getIphoneCatalog().subscribe({
+      next: (response) => {
+        this.iphoneCatalog = response.devices;
+        this.catalogSourceUrl = response.sourceUrl;
+        this.catalogSyncedAt = response.syncedAt;
+        this.syncVariantOptions(String(this.pubForm.get('model')?.value || ''));
+      },
+      error: () => {
+        this.catalogError = 'Nao foi possivel carregar o catalogo Apple.';
+      }
+    });
+  }
+
+  validateImei() {
+    const imei = String(this.pubForm.get('imei')?.value || '').trim();
+    const model = String(this.pubForm.get('model')?.value || '').trim();
+
+    if (!imei) {
+      this.imeiValidationState = 'idle';
+      this.imeiValidationMessage = '';
+      return;
+    }
+
+    this.imeiValidationState = 'checking';
+    this.imeiValidationMessage = 'A validar IMEI...';
+
+    this.deviceService.validateImei(imei, model || undefined).subscribe({
+      next: (response) => {
+        this.applyImeiValidationResult(response);
+      },
+      error: (err: HttpErrorResponse) => {
+        const response = err.error as Partial<ImeiValidationResponse> | undefined;
+        this.imeiValidationState = 'invalid';
+        this.imeiValidationMessage = response?.reason || 'Nao foi possivel validar o IMEI.';
+      }
+    });
+  }
+
   onSubmitPublication() {
     this.hasAttemptedSubmit = true;
 
     if (this.pubForm.invalid) {
       this.pubForm.markAllAsTouched();
       this.message = `Falta preencher: ${this.getMissingRequiredFields().join(', ')}.`;
+      return;
+    }
+
+    if (this.pubForm.value.imei && this.imeiValidationState === 'invalid') {
+      this.message = this.imeiValidationMessage || 'O IMEI introduzido nao e valido.';
       return;
     }
 
@@ -268,9 +294,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: () => {
         this.isLoading = false;
         this.viewMode = 'list';
-        this.pubForm.reset({ type: 'Perdido', photo: null });
+        this.pubForm.reset({
+          type: 'Perdido',
+          model: '',
+          color: '',
+          storage: '',
+          imei: '',
+          distinctiveMarks: '',
+          zone: '',
+          exactLocation: '',
+          dateOfEvent: '',
+          photo: null,
+        });
         this.photoPreview = null;
         this.hasAttemptedSubmit = false;
+        this.imeiValidationState = 'idle';
+        this.imeiValidationMessage = '';
+        this.syncVariantOptions('');
         this.loadPublications();
       },
       error: (err: HttpErrorResponse) => {
@@ -344,6 +384,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     return 'Sem mensagens ainda.';
+  }
+
+  private syncVariantOptions(model: string) {
+    const selectedModel = this.iphoneCatalog.find((item) => item.model === model);
+
+    this.availableColors = selectedModel?.colors ?? [];
+    this.availableStorages = selectedModel?.storages ?? [];
+
+    const selectedColor = String(this.pubForm.get('color')?.value || '');
+    if (selectedColor && !this.availableColors.includes(selectedColor)) {
+      this.pubForm.patchValue({ color: '' }, { emitEvent: false });
+    }
+
+    const selectedStorage = String(this.pubForm.get('storage')?.value || '');
+    if (selectedStorage && !this.availableStorages.includes(selectedStorage)) {
+      this.pubForm.patchValue({ storage: '' }, { emitEvent: false });
+    }
+  }
+
+  private applyImeiValidationResult(response: ImeiValidationResponse) {
+    this.imeiValidationState = response.isValid ? 'valid' : 'invalid';
+    this.imeiValidationMessage = response.isValid
+      ? 'IMEI valido no formato e checksum. A verificacao de existencia externa ainda nao esta configurada.'
+      : response.reason;
   }
 
   private getMissingRequiredFields() {

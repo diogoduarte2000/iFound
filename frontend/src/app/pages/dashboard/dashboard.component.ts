@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PublicationService } from '../../services/publication.service';
 import { AuthService } from '../../services/auth.service';
 import { ChatService } from '../../services/chat.service';
@@ -31,6 +31,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isLoading = false;
   isFeedLoading = false;
   isConversationLoading = false;
+  isEditingPublication = false;
+  isPreparingEdit = false;
+  editingPublicationId = '';
   message = '';
   conversationError = '';
   photoPreview: string | null = null;
@@ -54,6 +57,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private chatService: ChatService,
     private deviceService: DeviceService,
     private fb: FormBuilder,
+    private route: ActivatedRoute,
     private router: Router
   ) {
     this.pubForm = this.fb.group({
@@ -95,6 +99,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadIphoneCatalog();
     this.loadPublications();
     this.loadConversations();
+
+    this.route.queryParamMap.subscribe((params) => {
+      const editId = params.get('editId');
+
+      if (editId) {
+        this.loadPublicationForEditing(editId);
+        return;
+      }
+
+      if (this.isEditingPublication || this.isPreparingEdit) {
+        this.clearEditState();
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -114,6 +131,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   setCreateView() {
     this.viewMode = 'create';
+    this.message = '';
+
+    if (this.isEditingPublication || this.isPreparingEdit) {
+      this.clearEditState();
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { editId: null },
+        queryParamsHandling: 'merge'
+      });
+      return;
+    }
+
+    this.resetPublicationForm();
+  }
+
+  cancelEditMode() {
+    this.clearEditState();
+    this.router.navigate(['/minhas-publicacoes']);
   }
 
   openChatsPage() {
@@ -310,27 +345,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.message = '';
 
-    this.pubService.createPublication(this.pubForm.value).subscribe({
+    const payload = this.pubForm.value;
+    const request$ = this.isEditingPublication && this.editingPublicationId
+      ? this.pubService.updatePublication(this.editingPublicationId, payload)
+      : this.pubService.createPublication(payload);
+
+    request$.subscribe({
       next: () => {
         this.isLoading = false;
+
+        if (this.isEditingPublication) {
+          this.clearEditState();
+          this.loadPublications();
+          this.router.navigate(['/minhas-publicacoes']);
+          return;
+        }
+
         this.viewMode = 'list';
-        this.pubForm.reset({
-          type: 'Perdido',
-          model: '',
-          color: '',
-          storage: '',
-          imei: '',
-          distinctiveMarks: '',
-          zone: '',
-          exactLocation: '',
-          dateOfEvent: '',
-          photo: null,
-        });
-        this.photoPreview = null;
-        this.hasAttemptedSubmit = false;
-        this.imeiValidationState = 'idle';
-        this.imeiValidationMessage = '';
-        this.syncVariantOptions('');
+        this.resetPublicationForm();
         this.loadPublications();
       },
       error: (err: HttpErrorResponse) => {
@@ -350,7 +382,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.message = err.error?.message || 'Erro ao criar publicacao.';
+        this.message = err.error?.message || (this.isEditingPublication ? 'Erro ao editar publicacao.' : 'Erro ao criar publicacao.');
       }
     });
   }
@@ -406,6 +438,82 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return 'Sem mensagens ainda.';
   }
 
+  private loadPublicationForEditing(publicationId: string) {
+    if (this.editingPublicationId === publicationId && this.isEditingPublication) {
+      this.viewMode = 'create';
+      return;
+    }
+
+    this.isPreparingEdit = true;
+    this.viewMode = 'create';
+    this.message = 'A carregar anuncio para edicao...';
+
+    this.pubService.getMyPublication(publicationId).subscribe({
+      next: (publication) => {
+        this.isPreparingEdit = false;
+        this.isEditingPublication = true;
+        this.editingPublicationId = publication._id;
+        this.applyPublicationToForm(publication);
+        this.message = '';
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isPreparingEdit = false;
+        this.message = err.error?.message || 'Nao foi possivel abrir este anuncio para edicao.';
+        this.viewMode = 'list';
+      }
+    });
+  }
+
+  private applyPublicationToForm(publication: any) {
+    this.photoPreview = publication.photo || null;
+    this.pubForm.reset({
+      type: publication.type || 'Perdido',
+      model: publication.model || '',
+      color: publication.color || '',
+      storage: publication.storage || '',
+      imei: publication.imei || '',
+      distinctiveMarks: publication.distinctiveMarks || '',
+      zone: publication.zone || '',
+      exactLocation: publication.exactLocation || '',
+      dateOfEvent: publication.dateOfEvent ? new Date(publication.dateOfEvent).toISOString().slice(0, 10) : '',
+      photo: publication.photo || null,
+    });
+    this.hasAttemptedSubmit = false;
+    this.photoError = '';
+    this.imeiValidationState = 'idle';
+    this.imeiValidationMessage = '';
+    this.syncVariantOptions(String(publication.model || ''));
+  }
+
+  private clearEditState() {
+    this.isEditingPublication = false;
+    this.isPreparingEdit = false;
+    this.editingPublicationId = '';
+    this.message = '';
+    this.resetPublicationForm();
+  }
+
+  private resetPublicationForm() {
+    this.pubForm.reset({
+      type: 'Perdido',
+      model: '',
+      color: '',
+      storage: '',
+      imei: '',
+      distinctiveMarks: '',
+      zone: '',
+      exactLocation: '',
+      dateOfEvent: '',
+      photo: null,
+    });
+    this.photoPreview = null;
+    this.photoError = '';
+    this.hasAttemptedSubmit = false;
+    this.imeiValidationState = 'idle';
+    this.imeiValidationMessage = '';
+    this.syncVariantOptions('');
+  }
+
   private syncVariantOptions(model: string) {
     const selectedModel = this.iphoneCatalog.find((item) => item.model === model);
 
@@ -426,7 +534,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private applyImeiValidationResult(response: ImeiValidationResponse) {
     this.imeiValidationState = response.isValid ? 'valid' : 'invalid';
     this.imeiValidationMessage = response.isValid
-      ? 'IMEI valido no formato e checksum. A verificacao de existencia externa ainda nao esta configurada.'
+      ? 'IMEI valido com 15 digitos numericos. A verificacao de existencia externa ainda nao esta configurada.'
       : response.reason;
   }
 

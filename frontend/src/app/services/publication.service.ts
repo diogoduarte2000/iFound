@@ -40,10 +40,22 @@ export class PublicationService {
     return this.http.get<any[]>(`${this.apiUrl}/mine`, this.getAuthHeaders());
   }
 
+  getMyPublication(publicationId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/mine/${publicationId}`, this.getAuthHeaders());
+  }
+
   updatePublicationStatus(publicationId: string, status: string): Observable<any> {
     return this.http.patch(
       `${this.apiUrl}/${publicationId}/status`,
       { status },
+      this.getAuthHeaders()
+    );
+  }
+
+  updatePublication(publicationId: string, data: any): Observable<any> {
+    return this.http.patch(
+      `${this.apiUrl}/${publicationId}`,
+      data,
       this.getAuthHeaders()
     );
   }

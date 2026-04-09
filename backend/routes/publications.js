@@ -15,6 +15,69 @@ const RESOLVED_RETENTION_MS = 5 * 60 * 1000;
 
 const normalizeTextField = (value) => String(value || "").trim();
 
+const parsePublicationPayload = (body, requirePhoto = true) => {
+  const type = normalizeTextField(body.type);
+  const model = normalizeTextField(body.model);
+  const color = normalizeTextField(body.color);
+  const storage = normalizeTextField(body.storage);
+  const imei = normalizeTextField(body.imei);
+  const distinctiveMarks = normalizeTextField(body.distinctiveMarks);
+  const zone = normalizeTextField(body.zone);
+  const exactLocation = normalizeTextField(body.exactLocation);
+  const dateOfEvent = body.dateOfEvent;
+  const photo = body.photo;
+
+  if (!["Perdido", "Achado"].includes(type)) {
+    return { error: "Tipo invalido." };
+  }
+
+  if (!model || !color || !zone || !dateOfEvent) {
+    return { error: "Faltam campos obrigatorios na publicacao." };
+  }
+
+  if (requirePhoto && !photo) {
+    return { error: "E obrigatorio anexar uma fotografia." };
+  }
+
+  const catalogModel = findAppleIphoneByModel(model);
+
+  if (catalogModel) {
+    if (!catalogModel.colors.includes(color)) {
+      return { error: "A cor selecionada nao corresponde ao modelo escolhido." };
+    }
+
+    if (storage && !catalogModel.storages.includes(storage)) {
+      return { error: "A memoria selecionada nao corresponde ao modelo escolhido." };
+    }
+  }
+
+  let normalizedImei = "";
+  if (imei) {
+    const imeiValidation = getImeiValidationResult(imei);
+
+    if (!imeiValidation.isValid) {
+      return { error: imeiValidation.reason };
+    }
+
+    normalizedImei = imeiValidation.normalizedImei;
+  }
+
+  return {
+    value: {
+      type,
+      model,
+      color,
+      storage,
+      imei: normalizedImei,
+      distinctiveMarks,
+      zone,
+      exactLocation,
+      dateOfEvent,
+      photo,
+    },
+  };
+};
+
 const expirePublications = async (authorId) => {
   const now = new Date();
   const resolvedFilter = {
@@ -55,51 +118,23 @@ const expirePublications = async (authorId) => {
 
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    const type = normalizeTextField(req.body.type);
-    const model = normalizeTextField(req.body.model);
-    const color = normalizeTextField(req.body.color);
-    const storage = normalizeTextField(req.body.storage);
-    const imei = normalizeTextField(req.body.imei);
-    const distinctiveMarks = normalizeTextField(req.body.distinctiveMarks);
-    const zone = normalizeTextField(req.body.zone);
-    const exactLocation = normalizeTextField(req.body.exactLocation);
-    const dateOfEvent = req.body.dateOfEvent;
-    const photo = req.body.photo;
-
-    if (!["Perdido", "Achado"].includes(type)) {
-      return res.status(400).json({ message: "Tipo invalido." });
+    const parsedPayload = parsePublicationPayload(req.body, true);
+    if (parsedPayload.error) {
+      return res.status(400).json({ message: parsedPayload.error });
     }
 
-    if (!model || !color || !zone || !dateOfEvent) {
-      return res.status(400).json({ message: "Faltam campos obrigatorios na publicacao." });
-    }
-
-    if (!photo) {
-      return res.status(400).json({ message: "É obrigatório anexar uma fotografia." });
-    }
-
-    const catalogModel = findAppleIphoneByModel(model);
-
-    if (catalogModel) {
-      if (!catalogModel.colors.includes(color)) {
-        return res.status(400).json({ message: "A cor selecionada nao corresponde ao modelo escolhido." });
-      }
-
-      if (storage && !catalogModel.storages.includes(storage)) {
-        return res.status(400).json({ message: "A memoria selecionada nao corresponde ao modelo escolhido." });
-      }
-    }
-
-    let normalizedImei = "";
-    if (imei) {
-      const imeiValidation = getImeiValidationResult(imei);
-
-      if (!imeiValidation.isValid) {
-        return res.status(400).json({ message: imeiValidation.reason });
-      }
-
-      normalizedImei = imeiValidation.normalizedImei;
-    }
+    const {
+      type,
+      model,
+      color,
+      storage,
+      imei: normalizedImei,
+      distinctiveMarks,
+      zone,
+      exactLocation,
+      dateOfEvent,
+      photo,
+    } = parsedPayload.value;
 
     await expirePublications(req.user.id);
 
@@ -194,6 +229,91 @@ router.get("/mine", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erro ao buscar as suas publicacoes." });
+  }
+});
+
+router.get("/mine/:publicationId", authMiddleware, async (req, res) => {
+  try {
+    await expirePublications(req.user.id);
+
+    const publication = await Publication.findOne({
+      _id: req.params.publicationId,
+      author: req.user.id,
+    });
+
+    if (!publication) {
+      return res.status(404).json({ message: "Publicacao nao encontrada." });
+    }
+
+    res.json(publication);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao buscar a publicacao." });
+  }
+});
+
+router.patch("/:publicationId", authMiddleware, async (req, res) => {
+  try {
+    await expirePublications(req.user.id);
+
+    const publication = await Publication.findOne({
+      _id: req.params.publicationId,
+      author: req.user.id,
+    });
+
+    if (!publication) {
+      return res.status(404).json({ message: "Publicacao nao encontrada." });
+    }
+
+    if (["Offline", "Resolvido"].includes(publication.status)) {
+      return res.status(400).json({ message: "So pode editar publicacoes ativas ou pendentes." });
+    }
+
+    const parsedPayload = parsePublicationPayload(
+      {
+        ...req.body,
+        photo: req.body.photo || publication.photo,
+      },
+      true
+    );
+
+    if (parsedPayload.error) {
+      return res.status(400).json({ message: parsedPayload.error });
+    }
+
+    const {
+      type,
+      model,
+      color,
+      storage,
+      imei,
+      distinctiveMarks,
+      zone,
+      exactLocation,
+      dateOfEvent,
+      photo,
+    } = parsedPayload.value;
+
+    publication.type = type;
+    publication.model = model;
+    publication.color = color;
+    publication.storage = storage;
+    publication.imei = imei;
+    publication.distinctiveMarks = distinctiveMarks;
+    publication.zone = zone;
+    publication.exactLocation = exactLocation;
+    publication.dateOfEvent = dateOfEvent;
+    publication.photo = photo;
+
+    await publication.save();
+
+    res.json({
+      message: "Publicacao atualizada com sucesso.",
+      publication,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao atualizar a publicacao." });
   }
 });
 

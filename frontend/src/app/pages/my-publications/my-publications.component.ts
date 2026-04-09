@@ -65,6 +65,16 @@ export class MyPublicationsComponent implements OnInit, OnDestroy {
     });
   }
 
+  editPublication(publication: any) {
+    if (!this.canEditPublication(publication)) {
+      return;
+    }
+
+    this.router.navigate(['/dashboard'], {
+      queryParams: { editId: publication._id }
+    });
+  }
+
   updateStatus(publication: any, status: 'Ativo' | 'Pendente' | 'Resolvido') {
     if (publication.status === 'Offline' || publication.status === 'Resolvido' || this.updatingPublicationId === publication._id) {
       return;
@@ -82,10 +92,10 @@ export class MyPublicationsComponent implements OnInit, OnDestroy {
           this.publications = [...this.publications];
         }
         this.updatingPublicationId = '';
-        this.message = `Mudança aplicada e guardada! Novo estado: ${updatedDoc.status}.`;
-        
+        this.message = `Mudanca aplicada e guardada! Novo estado: ${updatedDoc.status}.`;
+
         setTimeout(() => {
-          if (this.message.startsWith('Mudança aplicada')) {
+          if (this.message.startsWith('Mudanca aplicada')) {
             this.message = '';
           }
         }, 5000);
@@ -95,6 +105,10 @@ export class MyPublicationsComponent implements OnInit, OnDestroy {
         this.message = err.error?.message || 'Nao foi possivel atualizar o estado da publicacao.';
       }
     });
+  }
+
+  canEditPublication(publication: any) {
+    return publication?.status !== 'Offline' && publication?.status !== 'Resolvido';
   }
 
   getOnlineCount() {

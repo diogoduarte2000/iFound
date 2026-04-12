@@ -2,6 +2,8 @@
 
 **iFound** é uma plataforma web moderna para relatar, gerir e recuperar **dispositivos e artigos perdidos/achados** em Portugal, com suporte especial para equipamentos Apple. Oferece uma experiência premium baseada no *design system* Apple com Glassmorphism, cores minimalistas e tipografia elegante, permitindo que a comunidade portuguesa collaborate para encontrar bens de forma segura e eficiente.
 
+> ℹ️ **NOTA**: Este repositório GitHub é um **espelho/protótipo** do projeto. O **desenvolvimento ativo** está a decorrer localmente. Para colaborações ou perguntas, contacte o owner.
+
 ---
 
 ## 🎯 Funcionalidades Principais
@@ -266,6 +268,17 @@ git push origin main  # Trigger automático no Vercel
 | `SMTP_PORT` | 🟢 Opcional | `465` |
 | `SMTP_USER` | 🟢 Opcional | `seu-email@gmail.com` |
 | `SMTP_PASS` | 🟢 Opcional | `app-password-de-16-caracteres` |
+
+---
+
+## ⚙️ Status de Desenvolvimento
+
+- **Ambiente Local**: `F:\Nova pasta\Ifound` (Development)
+- **Repositório GitHub**: Espelho/Protótipo para showcase
+- **Status**: 🔨 Em desenvolvimento ativo
+- **Próximos Passos**: Beta testing, documentação de API, testes unitários
+
+Este repositório serve principalmente como **vitrine técnica** do projeto. O código-fonte real com histórico de commits está no servidor de desenvolvimento local.
 
 ---
 

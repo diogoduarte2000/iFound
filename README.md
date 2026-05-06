@@ -2,6 +2,7 @@
 
 **iFound** é uma plataforma web moderna para relatar, gerir e recuperar **dispositivos e artigos perdidos/achados** em Portugal, com suporte especial para equipamentos Apple. Oferece uma experiência premium baseada no *design system* Apple com Glassmorphism, cores minimalistas e tipografia elegante, permitindo que a comunidade portuguesa collaborate para encontrar bens de forma segura e eficiente.
 
+Website funcional - https://ifound.zerodown.top/
 ---
 
 ## 🎯 Funcionalidades Principais
